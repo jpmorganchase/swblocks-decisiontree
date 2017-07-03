@@ -39,17 +39,17 @@ If the order of the columns are changed to make the Boss's mood higher importanc
 </code><p>
 <p>
 
-###Structure of code
+### Structure of code
 The code is in a multi-module structure project structure.
-####Core
+#### Core
 The Core project contains the main algorithms for the tree building and construction.
-####Change
+#### Change
 The Change project provides an API to modify a DecisionTree in an audited and controlled manor.
-####Persistence-json-jackson
+#### Persistence-json-jackson
 A persistence module for writing and reading using a JSON structure and the Jackson JSON code.
-####Persistence-cassandra
+#### Persistence-cassandra
 A persistence module for writing and reading using Cassandra as a storage.
-#####Examples
+##### Examples
 A set of example code to demonstrate usage of the DecisionTree.
 <p>
 
