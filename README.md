@@ -31,12 +31,14 @@ If the order of the columns are changed to make the Boss's mood higher importanc
 | 4 | * | * | Friday | 5 pm | Party time |
 | 5 | * | * | * | 7 pm | Go home |
 | 6 | Angry | * | * | 10 pm | More work |
+
 <br>If the same inputs are sent in:
 <br><code>Inputs: Day of Week: Monday, Outstanding Work: High, Boss's mood: Angry
 <br>This matches rules 1, 5 and 6. Rule 1 gives 001, Rule 5 gives 000 and Rule 6 gives 100, rule 6 is picked. 
 <br>Output: Leave Time: 10pm, After Work: More work
 </code><p>
-<br>
+<p>
+
 ###Structure of code
 The code is in a multi-module structure project structure.
 ####Core
