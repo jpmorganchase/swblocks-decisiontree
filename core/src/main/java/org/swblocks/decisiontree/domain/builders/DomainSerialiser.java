@@ -1,0 +1,210 @@
+/*
+ * This file is part of the swblocks-decisiontree library.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.swblocks.decisiontree.domain.builders;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import org.agrona.Strings;
+import org.swblocks.decisiontree.domain.DriverCache;
+import org.swblocks.decisiontree.tree.GroupDriver;
+import org.swblocks.decisiontree.tree.InputDriver;
+import org.swblocks.decisiontree.tree.InputValueType;
+import org.swblocks.decisiontree.tree.RegexDriver;
+import org.swblocks.decisiontree.tree.StringDriver;
+
+/**
+ * Utility methods to convert the DecisionTree domain objects to and from their string format.
+ *
+ * <p>This is used for retrieving and storing in Json or other persistent stores.
+ */
+public final class DomainSerialiser {
+    private static final Function<String, InputValueType> INPUT_VALUE_TYPE_FUNCTION = driverValue -> {
+        if (driverValue.startsWith(GroupDriver.VG_PREFIX)) {
+            return InputValueType.VALUE_GROUP;
+        } else if (driverValue.contains(".?") || driverValue.contains(".*")) {
+            return InputValueType.REGEX;
+        }
+        return InputValueType.STRING;
+    };
+
+    /**
+     * Private constructor to enforce static use.
+     */
+    private DomainSerialiser() {
+    }
+
+    /**
+     * Converts the List of {@link InputDriver} into a String form for serialising out.
+     *
+     * <p>The order of the drivers is maintained.
+     *
+     * @param drivers Array of {@link InputDriver} to convert
+     * @return String form of inputs.
+     */
+    public static List<String> convertDrivers(final InputDriver[] drivers) {
+        return Arrays.stream(drivers).map(InputDriver::toString).collect(Collectors.toList());
+    }
+
+    /**
+     * Converts the List of {@link InputDriver} into a String form for serialising out.
+     *
+     * <p>The order of the drivers is maintained.
+     *
+     * @param drivers Array of {@link InputDriver} to convert
+     * @return String form of inputs.
+     */
+    public static List<String> convertDriversWithSubGroups(final List<InputDriver> drivers) {
+        final List<String> driverList = new ArrayList<>(drivers.size());
+        GroupDriver.convertDriversIntoDriversAndGroups(drivers, driverList, driverList);
+        return driverList;
+    }
+
+    /**
+     * Converts the Map of Output name value pairs into a String form for serialising out.
+     *
+     * @param outputMap Map of Strings name value pairs
+     * @return List of outputs
+     */
+    public static List<String> convertOutputs(final Map<String, String> outputMap) {
+        return outputMap.entrySet().stream().map(
+                entry -> entry.getKey() + ":" + entry.getValue()).collect(Collectors.toList());
+    }
+
+    /**
+     * Converts the list of Output name value pairs to a map format.
+     *
+     * @param outputs the list of name value pairs
+     * @return the map of outputs
+     */
+    public static Map<String, String> convertOutputs(final List<String> outputs) {
+        return outputs.stream()
+                .map(item -> item.split(":", 2)).collect(Collectors.toMap(item -> item[0], item -> item[1],
+                        (key, value) -> key));
+    }
+
+    /**
+     * Creates a {@link Supplier} to provide an implementation of an {@link InputDriver} for the serialised String.
+     *
+     * @param currentDriver Serialised form of the driver definition.
+     * @param cache         {@link DriverCache} cache of {@link InputDriver}
+     * @return {@link Supplier} of {@link InputDriver}
+     */
+    public static Supplier<InputDriver> createInputDriver(final String currentDriver, final DriverCache cache) {
+        return () -> {
+            final InputValueType type = INPUT_VALUE_TYPE_FUNCTION.apply(currentDriver);
+            final InputDriver inputDriver;
+            if (InputValueType.VALUE_GROUP.equals(type)) {
+                inputDriver = getValueGroupDriver(currentDriver, cache, type);
+            } else {
+                inputDriver = getSingleDriver(currentDriver, cache, type);
+            }
+            return inputDriver;
+        };
+    }
+
+    private static InputDriver getSingleDriver(final String currentDriver,
+                                               final DriverCache cache,
+                                               final InputValueType type) {
+        InputDriver inputDriver = cache.get(currentDriver, type);
+
+        if (inputDriver == null) {
+            switch (type) {
+                case STRING:
+                    inputDriver = new StringDriver(currentDriver);
+                    break;
+                case REGEX:
+                    inputDriver = new RegexDriver(currentDriver);
+                    break;
+                default:
+                    inputDriver = null;
+                    break;
+            }
+            cache.put(inputDriver);
+        }
+        return inputDriver;
+    }
+
+    private static InputDriver getValueGroupDriver(final String currentDriver,
+                                                   final DriverCache cache,
+                                                   final InputValueType type) {
+        final String[] tokensGroup = currentDriver.split("VG:");
+        final String value = tokensGroup[1].split(":")[0];
+
+        InputDriver inputDriver = cache.get(value, type);
+        if (inputDriver == null) {
+            final List<InputDriver> topLevelDriver = new ArrayList<>(16);
+            for (int i = 2; i < tokensGroup.length; i++) {
+                if (Strings.isEmpty(tokensGroup[i])) {
+                    continue;
+                }
+                final String name = tokensGroup[i].split(":")[0];
+
+                InputDriver subGroup = cache.get(name, type);
+                if (subGroup == null) {
+                    final List<InputDriver> subDrivers = getGroupDrivers(tokensGroup[i], cache);
+                    subGroup = new GroupDriver(name, subDrivers);
+                    topLevelDriver.add(subGroup);
+                    cache.put(subGroup);
+                }
+            }
+
+            topLevelDriver.addAll(getGroupDrivers(tokensGroup[1], cache));
+            inputDriver = new GroupDriver(value, topLevelDriver);
+            cache.put(inputDriver);
+        }
+        return inputDriver;
+    }
+
+    private static List<InputDriver> getGroupDrivers(final String currentToken,
+                                                     final DriverCache cache) {
+        final List<InputDriver> drivers = new ArrayList<>();
+
+        if (Strings.isEmpty(currentToken)) {
+            return Collections.emptyList();
+        }
+
+        final String[] tokens = currentToken.split(":", 0);
+
+        // Position 0 contains a name
+        for (int i = 1; i < tokens.length; i++) {
+            final String tokenValue = tokens[i];
+            final InputValueType tokenType = INPUT_VALUE_TYPE_FUNCTION.apply(tokenValue);
+            InputDriver driver = cache.get(tokenValue, tokenType);
+
+            if (driver == null) {
+                switch (tokenType) {
+                    case REGEX:
+                        driver = new RegexDriver(tokenValue);
+                        break;
+                    default:
+                        driver = new StringDriver(tokenValue);
+                        break;
+                }
+                cache.put(driver);
+            }
+            drivers.add(driver);
+        }
+        return drivers;
+    }
+}

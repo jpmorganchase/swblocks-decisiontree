@@ -1,0 +1,7 @@
+
+"EXMETHOD", "EXCHANGE", "PRODUCT", "REGION", "ASSET"
+"*", "VG:CMEGroup:CME:CBOT", "*", "*", "INDEX","Rate:1.1"
+"*", "CME", "S&P", "*", "INDEX" , "Rate:1.2"
+"VOICE", "CME", "ED", "*", "RATE", "Rate:1.4"
+"VOICE", "*", "*", "US", "*", "Rate:1.5"
+"Invalid line, will be ignored"
