@@ -1,0 +1,339 @@
+/*
+ * This file is part of the swblocks-decision-tree library.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+buildscript {
+    apply plugin: 'java'
+
+    configurations.all {
+        resolutionStrategy {
+            dependencySubstitution {
+                substitute module('excalibur-logger:excalibur-logger:2.1') with module('excalibur-logger:excalibur-logger:1.1')
+                substitute module('dnsjava:dnsjava:2.1.7') with module('dnsjava:dnsjava:2.1.6')
+                substitute module('com.esotericsoftware:kryo:3.0.3') with module('com.esotericsoftware:kryo:4.0.0')
+            }
+            exclude group: 'd-haven-managed-pool'
+        }
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+def mavenUser = project.hasProperty('mavenUser') ? project.property('mavenUser') : ''
+def mavenPassword = project.hasProperty('mavenPassword') ? project.property('mavenPassword') : ''
+def mavenSnapshotRepo = project.hasProperty('mavenSnapshotRepo') ? project.property('mavenSnapshotRepo') : ''
+def mavenReleaseRepo = project.hasProperty('mavenReleaseRepo') ? project.property('mavenReleaseRepo') : ''
+def mavenGroup = project.hasProperty('mavenGroup') ? project.property('mavenGroup') : 'org.swblocks.decisiontree'
+
+Properties versionProps = new Properties()
+versionProps.load(new FileInputStream(file('version.properties')))
+def mavenVersion = versionProps['version']
+project.group = mavenGroup
+project.version = mavenVersion
+
+logger.lifecycle('group {}, version {}', project.group, project.version)
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+apply plugin: 'jacoco'
+apply plugin: 'maven-publish'
+defaultTasks 'clean', 'build', 'publishToMavenLocal'
+
+tasks.withType(Test) {
+    reports.html.destination = file("${reporting.baseDir}/${name}")
+}
+
+def projectPom = {
+    name 'SWBlocks-DecisionTree'
+    url 'https://github.com/jpmorganchase/swblocks-decisiontree'
+
+    issueManagement {
+        system 'GitHub'
+        url 'https://github.com/jpmorganchase/swblocks-decisiontree/issues'
+    }
+    scm {
+        connection 'scm:git:https://github.com/jpmorganchase/swblocks-decisiontree.git'
+        developerConnection 'scm:git:https://github.com/jpmorganchase/swblocks-decisiontree.git'
+        url 'https://github.com/jpmorganchase/swblocks-decisiontree.git'
+    }
+    licenses {
+        license {
+            name 'The Apache License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+        }
+    }
+    developers {
+        developer {
+            id 'lazar-ivanov'
+            name 'Lazar Ivanov'
+            url 'https://github.com/lazar-ivanov'
+        }
+        developer {
+            id 'logicrunner'
+            name 'James Winnifrith'
+            url 'https://github.com/LogicRunner'
+        }
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'checkstyle'
+    apply plugin: 'signing'
+    apply plugin: 'jacoco'
+    apply plugin: 'maven-publish'
+
+    group = mavenGroup
+    version = mavenVersion
+
+    sourceSets {
+        integrationTest {
+            java {
+                compileClasspath += main.output + test.output
+                runtimeClasspath += main.output + test.output
+                srcDir file('src/test-integration/java')
+            }
+            resources.srcDir file('src/test-integration/resources')
+        }
+    }
+    configurations {
+        integrationTestCompile.extendsFrom testCompile
+        integrationTestRuntime.extendsFrom testRuntime
+        testArtifacts.extendsFrom testRuntime
+    }
+
+    [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+    checkstyle {
+        toolVersion = '6.14.1'
+        configFile = new File(rootDir, 'config/checkstyle/jbl_checks.xml')
+    }
+
+    tasks.withType(Test) {
+        testLogging {
+            // set options for log level LIFECYCLE
+            events "failed", "standardOut", "standardError"
+            showExceptions true
+            exceptionFormat "full"
+            showCauses true
+            showStackTraces true
+        }
+    }
+
+    compileJava {
+        /*
+         * To suppress warnings about using Unsafe and sun.misc
+         */
+        options.compilerArgs << '-XDignore.symbol.file'
+        options.fork = true
+        options.forkOptions.executable = 'javac'
+
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
+    }
+
+    dependencies {
+        checkstyle 'com.puppycrawl.tools:checkstyle:7.3+'
+
+        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.+'
+
+        testCompile(
+                'org.hamcrest:hamcrest-all:1.3+',
+                'junit:junit:4.12+',
+                'org.powermock:powermock-module-junit4:1.6+',
+                'org.powermock:powermock-api-mockito:1.6+',
+                'org.awaitility:awaitility:2.0.0')
+        testRuntime group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
+        testRuntime group: 'org.slf4j', name: 'log4j-over-slf4j', version: '1.7+'
+        testRuntime group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7+'
+
+        integrationTestCompile(
+                'com.google.code.tempus-fugit:tempus-fugit:1.1')
+    }
+
+    jacoco {
+        toolVersion = '0.7.6.201602180812'
+    }
+
+    jacocoTestReport() {
+        dependsOn(project: test)
+        reports {
+            html.enabled true
+            xml.enabled true
+            csv.enabled false
+        }
+    }
+
+    javadoc {
+        title = '<h1>DecisionTree</h1>'
+    }
+
+    task integrationTest(type: Test) {
+        testClassesDir = sourceSets.integrationTest.output.classesDir
+        classpath = sourceSets.integrationTest.runtimeClasspath
+        outputs.upToDateWhen { false }
+    }
+
+    check.dependsOn integrationTest
+    integrationTest.mustRunAfter test
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    task testJar(type: Jar, dependsOn: testClasses) {
+        classifier = 'test'
+        from sourceSets.test.output
+    }
+
+    artifacts {
+        testArtifacts testJar
+    }
+
+    publishing {
+        repositories {
+            maven {
+                credentials {
+                    username "$mavenUser"
+                    password "$mavenPassword"
+                }
+                if (isReleaseVersion) {
+                    url "${mavenReleaseRepo}"
+                } else {
+                    url "${mavenSnapshotRepo}"
+                }
+            }
+        }
+        publications {
+            mavenJava(MavenPublication) {
+                pom.withXml {
+                    asNode().appendNode('description', 'Software Blocks DecisionTree Library')
+                    asNode().children().last()+projectPom
+                }
+                groupId "${mavenGroup}"
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
+            }
+        }
+    }
+}
+
+project(':core') {
+    description = "Decision Tree evaluation code"
+
+    dependencies {
+        compile 'org.agrona:Agrona:0.5.5'
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.4'
+        compile 'org.swblocks:jbl:1.0.2'
+
+        testCompile group: 'com.esotericsoftware', name: 'kryo', version: '4.0.0'
+        testCompile group: 'de.javakaffee', name: 'kryo-serializers', version: '0.37'
+    }
+}
+
+project(':persistence-cassandra') {
+    description = "Decision Tree Cassandra persistence"
+
+    dependencies {
+        compile project(':core')
+        compile project(':change')
+        compile group: 'com.datastax.cassandra', name: 'cassandra-driver-core', version: '3.1.1'
+        compile group: 'com.datastax.cassandra', name: 'cassandra-driver-extras', version: '3.1.0'
+        compile group: 'com.google.guava', name: 'guava', version: '18.0'
+
+        testCompile group: 'org.cassandraunit', name: 'cassandra-unit', version: '3.1.1.0'
+        testCompile project(path: ":core", configuration: 'testArtifacts')
+
+        // Runtime dependencies for cassandraunit
+        testRuntime group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.13'
+        testRuntime group: 'com.github.stephenc.high-scale-lib', name: 'high-scale-lib', version: '1.1.2'
+        testRuntime group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+        testRuntime group: 'org.fusesource', name: 'sigar', version: '1.6.4'
+        testRuntime group: 'com.googlecode.concurrent-trees', name: 'concurrent-trees', version: '2.4.0'
+        testRuntime group: 'com.googlecode.concurrentlinkedhashmap', name: 'concurrentlinkedhashmap-lru', version: '1.4'
+        testRuntime group: 'com.clearspring.analytics', name: 'stream', version: '2.7.0'
+        testRuntime group: 'org.xerial.snappy', name: 'snappy-java', version: '1.0.5'
+    }
+}
+
+project(':persistence-json-jackson') {
+    description = "Decision Tree JSON Jackson persistence"
+
+    dependencies {
+        compile project(':core')
+        compile project(':change')
+
+        testCompile project(path: ":core", configuration: 'testArtifacts')
+
+    }
+}
+
+project('change') {
+    description = "Decision Tree Change Management"
+
+    dependencies {
+        compile project(':core')
+
+        testCompile project(path: ":core", configuration: 'testArtifacts')
+    }
+}
+
+project('examples') {
+    description = "Decision Tree Examples"
+
+    dependencies {
+        compile project(':core')
+        compile project(':change')
+        compile project(':persistence-json-jackson')
+    }
+}
+
+task jacocoRootReport(type: JacocoReport, group: 'Coverage reports') {
+    description = 'Generates an aggregate report from all subprojects'
+    dependsOn(subprojects.jacocoTestReport)
+
+    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories = files(subprojects.sourceSets.main.output)
+    executionData = files(subprojects.jacocoTestReport.executionData)
+
+    reports {
+        html.enabled = true
+        xml.enabled = true
+        csv.enabled = false
+    }
+    doFirst {
+        executionData = files(executionData.findAll { it.exists() })
+    }
+}
+

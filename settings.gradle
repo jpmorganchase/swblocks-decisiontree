@@ -1,0 +1,12 @@
+pluginRepositories {
+    gradlePluginPortal()
+}
+rootProject.name = 'DecisionTree'
+include 'core', 'persistence-cassandra', 'persistence-json-jackson', 'change', 'examples'
+
+project(':core').projectDir = "$rootDir/core" as File
+project(':change').projectDir = "$rootDir/change" as File
+project(':persistence-cassandra').projectDir = "$rootDir/persistence-cassandra" as File
+project(':persistence-json-jackson').projectDir = "$rootDir/persistence-json-jackson" as File
+project(':examples').projectDir = "$rootDir/examples" as File
+

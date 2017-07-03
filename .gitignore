@@ -1,0 +1,16 @@
+.idea
+.gradle
+logs/*
+.classpath
+.project
+.settings
+*.log
+build
+target
+classes
+*.iml
+*.toDelete
+out
+gradle.properties
+/decision-tree-cassandra/*.dll
+/persistence-cassandra/*.dll
