@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jpmorganchase/swblocks-decisiontree.svg?branch=master)](https://travis-ci.org/jpmorganchase/swblocks-decisiontree)
+
 # swblocks-decisiontree
 
 ## Overview
