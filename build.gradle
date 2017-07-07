@@ -13,32 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-buildscript {
-    apply plugin: 'java'
-
-    configurations.all {
-        resolutionStrategy {
-            dependencySubstitution {
-                substitute module('excalibur-logger:excalibur-logger:2.1') with module('excalibur-logger:excalibur-logger:1.1')
-                substitute module('dnsjava:dnsjava:2.1.7') with module('dnsjava:dnsjava:2.1.6')
-                substitute module('com.esotericsoftware:kryo:3.0.3') with module('com.esotericsoftware:kryo:4.0.0')
-            }
-            exclude group: 'd-haven-managed-pool'
-        }
-    }
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-    }
-}
 
 plugins {
     id 'java'
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
@@ -105,6 +85,10 @@ allprojects {
     apply plugin: 'signing'
     apply plugin: 'jacoco'
     apply plugin: 'maven-publish'
+
+    repositories {
+         mavenCentral()
+    }
 
     group = mavenGroup
     version = mavenVersion
@@ -197,7 +181,6 @@ allprojects {
         outputs.upToDateWhen { false }
     }
 
-    check.dependsOn integrationTest
     integrationTest.mustRunAfter test
 
     task sourcesJar(type: Jar) {
