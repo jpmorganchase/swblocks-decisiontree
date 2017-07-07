@@ -197,7 +197,6 @@ allprojects {
         outputs.upToDateWhen { false }
     }
 
-    check.dependsOn integrationTest
     integrationTest.mustRunAfter test
 
     task sourcesJar(type: Jar) {
