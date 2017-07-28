@@ -31,10 +31,8 @@ import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.decisiontree.domain.builders.RuleBuilderSerialiser;
 import org.swblocks.decisiontree.util.CommisionRuleSetSupplier;
 import org.swblocks.jbl.eh.EhSupport;
-import org.swblocks.jbl.eh.Result;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for {@link FilePersister}.

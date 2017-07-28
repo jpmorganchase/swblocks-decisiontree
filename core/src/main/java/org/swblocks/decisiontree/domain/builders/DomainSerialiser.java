@@ -16,22 +16,26 @@
 
 package org.swblocks.decisiontree.domain.builders;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.agrona.Strings;
 import org.swblocks.decisiontree.domain.DriverCache;
+import org.swblocks.decisiontree.tree.DateRangeDriver;
 import org.swblocks.decisiontree.tree.GroupDriver;
 import org.swblocks.decisiontree.tree.InputDriver;
 import org.swblocks.decisiontree.tree.InputValueType;
 import org.swblocks.decisiontree.tree.RegexDriver;
 import org.swblocks.decisiontree.tree.StringDriver;
+import org.swblocks.jbl.util.DateRange;
 
 /**
  * Utility methods to convert the DecisionTree domain objects to and from their string format.
@@ -42,6 +46,8 @@ public final class DomainSerialiser {
     private static final Function<String, InputValueType> INPUT_VALUE_TYPE_FUNCTION = driverValue -> {
         if (driverValue.startsWith(GroupDriver.VG_PREFIX)) {
             return InputValueType.VALUE_GROUP;
+        } else if (driverValue.startsWith(DateRangeDriver.DR_PREFIX)) {
+            return InputValueType.DATE_RANGE;
         } else if (driverValue.contains(".?") || driverValue.contains(".*")) {
             return InputValueType.REGEX;
         }
@@ -136,11 +142,23 @@ public final class DomainSerialiser {
                 case REGEX:
                     inputDriver = new RegexDriver(currentDriver);
                     break;
+                case DATE_RANGE:
+                    final StringTokenizer tokenizer = new StringTokenizer(
+                            currentDriver.replace(DateRangeDriver.DR_PREFIX + ":",""), "|", false);
+                    if (tokenizer.countTokens() == 2) {
+                        final String start = tokenizer.nextToken();
+                        final String end = tokenizer.nextToken();
+                        inputDriver = new DateRangeDriver(currentDriver, new DateRange(Instant.parse(start),
+                                Instant.parse(end)));
+                    }
+                    break;
                 default:
                     inputDriver = null;
                     break;
             }
-            cache.put(inputDriver);
+            if (inputDriver != null) {
+                cache.put(inputDriver);
+            }
         }
         return inputDriver;
     }
@@ -148,7 +166,7 @@ public final class DomainSerialiser {
     private static InputDriver getValueGroupDriver(final String currentDriver,
                                                    final DriverCache cache,
                                                    final InputValueType type) {
-        final String[] tokensGroup = currentDriver.split("VG:");
+        final String[] tokensGroup = currentDriver.split(GroupDriver.VG_PREFIX);
         final String value = tokensGroup[1].split(":")[0];
 
         InputDriver inputDriver = cache.get(value, type);
@@ -190,19 +208,7 @@ public final class DomainSerialiser {
         for (int i = 1; i < tokens.length; i++) {
             final String tokenValue = tokens[i];
             final InputValueType tokenType = INPUT_VALUE_TYPE_FUNCTION.apply(tokenValue);
-            InputDriver driver = cache.get(tokenValue, tokenType);
-
-            if (driver == null) {
-                switch (tokenType) {
-                    case REGEX:
-                        driver = new RegexDriver(tokenValue);
-                        break;
-                    default:
-                        driver = new StringDriver(tokenValue);
-                        break;
-                }
-                cache.put(driver);
-            }
+            final InputDriver driver = getSingleDriver(tokenValue, cache, tokenType);
             drivers.add(driver);
         }
         return drivers;

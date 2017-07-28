@@ -204,6 +204,45 @@ public class DecisionTreeTest {
     }
 
     @Test
+    public void datedRangeDecisionTreeEvaluation() {
+        final DecisionTree decisionTree = DecisionTree.instanceOf(
+                new Loader<DecisionTreeRuleSet>() {
+                    @Override
+                    public boolean test(final Result result) {
+                        return false;
+                    }
+
+                    @Override
+                    public Result<DecisionTreeRuleSet> get() {
+                        return Result.success(CommisionRuleSetSupplier.getCommissionRuleSetWithDateRanges().build());
+                    }
+                },
+                DecisionTreeType.SINGLE);
+
+        assertNotNull(decisionTree);
+
+        Input input = decisionTree.createInputs("2013-04-10T00:00:00.Z", "VOICE", "CME", "ED", "US", "RATE");
+        Optional<OutputResults> results = decisionTree.getEvaluationFor(input);
+        assertTrue(results.isPresent());
+        assertEquals("1.6", results.get().results().get("Rate"));
+
+        input = decisionTree.createInputs("2013-04-05T00:00:00.Z", "VOICE", "CME", "ED", "US", "RATE");
+        results = decisionTree.getEvaluationFor(input);
+        assertTrue(results.isPresent());
+        assertEquals("1.5", results.get().results().get("Rate"));
+
+        input = decisionTree.createInputs("2013-03-31T22:00:00.Z", "VOICE", "NYMEX", "AMZ", "US", "SSO");
+        results = decisionTree.getEvaluationFor(input);
+        assertTrue(results.isPresent());
+        assertEquals("1.9", results.get().results().get("Rate"));
+
+        input = decisionTree.createInputs("2013-03-31T22:00:00.Z", "VOICE", "CME", "S&P", "US", "INDEX");
+        results = decisionTree.getEvaluationFor(input);
+        assertTrue(results.isPresent());
+        assertEquals("1.1", results.get().results().get("Rate"));
+    }
+
+    @Test
     public void createsDefaultInput() {
         final DecisionTree decisionTree = DecisionTree.instanceOf(new CommisionRuleSetSupplier(),
                 DecisionTreeType.SINGLE);

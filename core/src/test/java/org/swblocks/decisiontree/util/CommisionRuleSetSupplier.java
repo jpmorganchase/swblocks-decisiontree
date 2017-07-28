@@ -118,6 +118,65 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
     }
 
     /**
+     * Duplicates the getSlicedRuleSet test using a DATE_RANGE on a Single version tree over sliced trees.
+     */
+    public static Builder<RuleSetBuilder, DecisionTreeRuleSet> getCommissionRuleSetWithDateRanges() {
+        final UUID id = new UUID(0, 1);
+
+        final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder = RuleSetBuilder.creator("commissions",
+                Arrays.asList("RANGE", "EXMETHOD", "EXCHANGE", "PRODUCT", "REGION", "ASSET"));
+        addDateRangeRule(ruleSetBuilder, "2013-03-28T00:00:00Z", "2013-04-01T00:00:00Z",
+                "*", "CME", "*", "*", "INDEX",
+                null, null, 1L, "1.1");
+        addDateRangeRule(ruleSetBuilder, "2013-04-01T00:00:01Z", "2013-04-06T00:00:00Z",
+                "VOICE", "CME", "*", "*", "INDEX",
+                null, null, 2L, "1.2");
+        addDateRangeRule(ruleSetBuilder, "2013-04-01T00:00:00Z", "2013-04-04T00:00:00Z",
+                "*", "*", "S&P", "*", "INDEX",
+                null, null, 3L, "1.3");
+        addDateRangeRule(ruleSetBuilder, "2013-04-04T00:00:01Z", "2013-04-12T00:00:00Z",
+                "*", "CME", "S&P", "*", "INDEX",
+                null, null, 4L, "1.4");
+        addDateRangeRule(ruleSetBuilder, "2013-04-04T00:00:00Z", "2013-04-08T00:00:00Z",
+                "VOICE", "*", "ED", "*", "RATE",
+                null, null, 5L, "1.5");
+        addDateRangeRule(ruleSetBuilder, "2013-04-08T00:00:01Z", "2013-04-13T00:00:00Z",
+                "VOICE", "CME", "ED", "*", "RATE",
+                null, null, 6L, "1.6");
+        addDateRangeRule(ruleSetBuilder, "2013-04-06T00:00:00Z", "2013-04-08T00:00:00Z",
+                "VOICE", "*", "*", "US", "*",
+                null, null, 7L, "1.7");
+        addDateRangeRule(ruleSetBuilder, "2013-04-15T00:00:00Z", "2023-01-01T00:00:00Z",
+                "VOICE", "*", "*", "UK", "*",
+                null, null, 8L, "1.8");
+        addDateRangeRule(ruleSetBuilder, "2013-03-28T00:00:00Z", "3023-01-01T00:00:00Z",
+                "*", "*", "*", "US", "*",
+                null, null, 9L, "1.9");
+        return ruleSetBuilder;
+    }
+
+    /**
+     * Helper method to add a DateRange Commission Rule to the Commission ruleset.
+     * Should only be called from getCommissionRuleSetWithDateRanges.
+     */
+    private static Builder<RuleSetBuilder, DecisionTreeRuleSet> addDateRangeRule(
+            final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder,
+            final String startDate, final String endDate,
+            final String exmethod, final String exchange,
+            final String product, final String region,
+            final String asset, final Instant start,
+            final Instant finish, final long ruleId, final String rate) {
+        return ruleSetBuilder.with(RuleSetBuilder::rule, RuleBuilder.creator()
+                .with(RuleBuilder::input, Arrays.asList("DR:" + startDate + "|" + endDate,
+                        exmethod, exchange, product, region, asset))
+                .with(RuleBuilder::start, start)
+                .with(RuleBuilder::end, finish)
+                .with(RuleBuilder::setId, new UUID(0L, ruleId))
+                .with(RuleBuilder::setCode, new UUID(0L, ruleId))
+                .with(RuleBuilder::output, Collections.singletonMap("Rate", rate)));
+    }
+
+    /**
      * Creates a large ruleset based on the inputs.
      *
      * <p>It is possible that random number generation would create duplicate rules, so that the final total number

@@ -19,20 +19,12 @@ package org.swblocks.decisiontree.tree;
 import org.swblocks.jbl.util.DateRange;
 
 /**
- * Enum for the type of tree node used in the decision tree.
- *
- * <p>STRING represents a string tree node where the input value is matched against a string.
- *
- * <p>REGEX represents a regex tree node where the input value is matched against the regex.
- *
- * <p>VALUE_GROUP represents a value group tree node where an input value is matched within the value group.
- *
- * <p>DATE_RANGE represents a {@link DateRange} tree node where the input value is validated it is date and within the
- * range.
- *
+ * Driver holding a {@link DateRange}.
  */
-public enum InputValueType {
-    STRING, REGEX, VALUE_GROUP, DATE_RANGE;
+public class DateRangeDriver extends InputDriver {
+    public static final String DR_PREFIX = "DR";
 
-    public static final String WILDCARD = "*";
+    public DateRangeDriver(String name, DateRange range) {
+        super(name, InputValueType.DATE_RANGE, new DateRangeEvaluation(name, range));
+    }
 }

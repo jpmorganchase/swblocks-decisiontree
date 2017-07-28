@@ -79,10 +79,12 @@ final class GroupEvaluation implements Predicate<String> {
                 case STRING:
                     localGroup.add(inputDriver.getValue());
                     break;
-                case REGEX:
-                    localDrivers.add(inputDriver);
+                case VALUE_GROUP:
                     break;
+                case REGEX:
+                case DATE_RANGE:
                 default:
+                    localDrivers.add(inputDriver);
                     break;
             }
         });

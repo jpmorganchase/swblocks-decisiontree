@@ -142,7 +142,7 @@ class BaseTreeNode implements TreeNode {
         }
 
         for (final TreeNode node : this.nextNodes.values()) {
-            if (!node.evaluate("*")) {
+            if (!InputValueType.WILDCARD.equals(node.getValue())) {
                 ((BaseTreeNode) node).calculateFailureNode(this.failureNode);
             }
         }

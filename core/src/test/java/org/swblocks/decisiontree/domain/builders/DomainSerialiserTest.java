@@ -40,6 +40,7 @@ import org.swblocks.decisiontree.tree.StringDriver;
 import org.swblocks.jbl.builders.Builder;
 import org.swblocks.jbl.test.utils.JblTestClassUtils;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -85,6 +86,20 @@ public class DomainSerialiserTest {
         assertNotNull(serialisedDrivers);
         assertEquals(1, serialisedDrivers.size());
         assertEquals(testString, serialisedDrivers.get(0));
+    }
+
+    @Test
+    public void convertStringToDateRangeDriver() {
+        final DriverCache cache = new DriverCache();
+        final String testString = "DR:2017-07-04T16:00:00.000Z|2017-07-10T16:00:00.000Z";
+
+        final Supplier<InputDriver> rangeSupplier = DomainSerialiser.createInputDriver(testString, cache);
+        final InputDriver dateRangeDriver = rangeSupplier.get();
+        assertNotNull(dateRangeDriver);
+        assertThat(dateRangeDriver.getType(), is(InputValueType.DATE_RANGE));
+        assertThat(dateRangeDriver.getValue(), is(testString));
+        assertThat(dateRangeDriver.evaluate("2017-07-04T16:00:00.000Z"), is(true));
+        assertThat(dateRangeDriver.evaluate("2017-07-10T16:00:00.000Z"), is(false));
     }
 
     @Test
