@@ -35,6 +35,7 @@ import org.swblocks.decisiontree.tree.InputDriver;
 import org.swblocks.decisiontree.tree.InputValueType;
 import org.swblocks.decisiontree.tree.RegexDriver;
 import org.swblocks.decisiontree.tree.StringDriver;
+import org.swblocks.jbl.eh.EhSupport;
 import org.swblocks.jbl.util.DateRange;
 
 /**
@@ -145,12 +146,9 @@ public final class DomainSerialiser {
                 case DATE_RANGE:
                     final StringTokenizer tokenizer = new StringTokenizer(
                             currentDriver.replace(DateRangeDriver.DR_PREFIX + ":",""), "|", false);
-                    if (tokenizer.countTokens() == 2) {
-                        final String start = tokenizer.nextToken();
-                        final String end = tokenizer.nextToken();
-                        inputDriver = new DateRangeDriver(currentDriver, new DateRange(Instant.parse(start),
-                                Instant.parse(end)));
-                    }
+                    EhSupport.ensure(tokenizer.countTokens() == 2, "DateRange driver incorrectly formatted");
+                    inputDriver = new DateRangeDriver(currentDriver, new DateRange(Instant.parse(tokenizer.nextToken()),
+                            Instant.parse(tokenizer.nextToken())));
                     break;
                 default:
                     inputDriver = null;

@@ -16,6 +16,7 @@
 
 package org.swblocks.decisiontree.domain.builders;
 
+import java.time.format.DateTimeParseException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,6 +101,18 @@ public class DomainSerialiserTest {
         assertThat(dateRangeDriver.getValue(), is(testString));
         assertThat(dateRangeDriver.evaluate("2017-07-04T16:00:00.000Z"), is(true));
         assertThat(dateRangeDriver.evaluate("2017-07-10T16:00:00.000Z"), is(false));
+    }
+
+    @Test (expected = IllegalStateException.class)
+    public void failInvalidStringToDateRangeDriver() {
+        DomainSerialiser.createInputDriver("DR:2017-07-04T16:00:00.000Z2017-07-10T16:00:00.000Z",
+                new DriverCache()).get();
+    }
+
+    @Test (expected = DateTimeParseException.class)
+    public void failInvalidDateStringToDateRangeDriver() {
+        DomainSerialiser.createInputDriver("DR:2017-04T16:00:00.000Z|2017-07-10T16:00:00.000Z",
+                new DriverCache()).get();
     }
 
     @Test

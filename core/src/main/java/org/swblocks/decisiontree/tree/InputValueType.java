@@ -16,6 +16,7 @@
 
 package org.swblocks.decisiontree.tree;
 
+import org.swblocks.decisiontree.domain.DecisionTreeRule;
 import org.swblocks.jbl.util.DateRange;
 
 /**
@@ -27,8 +28,8 @@ import org.swblocks.jbl.util.DateRange;
  *
  * <p>VALUE_GROUP represents a value group tree node where an input value is matched within the value group.
  *
- * <p>DATE_RANGE represents a {@link DateRange} tree node where the input value is validated it is date and within the
- * range.
+ * <p>DATE_RANGE represents a {@link DateRange} tree node where the input value is validated it is a date and within the
+ * range defined in the {@link DateRange} within the {@link DecisionTreeRule}.
  *
  */
 public enum InputValueType {
