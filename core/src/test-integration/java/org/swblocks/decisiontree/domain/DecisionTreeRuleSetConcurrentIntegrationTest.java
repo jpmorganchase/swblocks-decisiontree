@@ -59,9 +59,7 @@ public class DecisionTreeRuleSetConcurrentIntegrationTest {
                 new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, 0).build();
         // Now remove them
         deleteSet = new HashMap<>();
-        ruleSet2.getRules().entrySet().stream().forEach(entity -> {
-            deleteSet.put(entity.getKey(), null);
-        });
+        ruleSet2.getRules().entrySet().forEach(entity -> deleteSet.put(entity.getKey(), null));
 
         updateChange = new TreeChange() {
             @Override
