@@ -20,6 +20,8 @@ package org.swblocks.decisiontree.tree;
  * Regex driver value which evaluates using a pattern matcher.
  */
 public final class RegexDriver extends InputDriver {
+    public static final String REGEX_PREFIX = "RE";
+
     public RegexDriver(final String value) {
         super(value, InputValueType.REGEX, new RegExEvaluation(value));
     }

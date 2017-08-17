@@ -49,7 +49,8 @@ public final class DomainSerialiser {
             return InputValueType.VALUE_GROUP;
         } else if (driverValue.startsWith(DateRangeDriver.DR_PREFIX)) {
             return InputValueType.DATE_RANGE;
-        } else if (driverValue.contains(".?") || driverValue.contains(".*")) {
+        } else if (driverValue.startsWith(RegexDriver.REGEX_PREFIX) ||
+                driverValue.contains(".?") || driverValue.contains(".*")) {
             return InputValueType.REGEX;
         }
         return InputValueType.STRING;
@@ -141,7 +142,7 @@ public final class DomainSerialiser {
                     inputDriver = new StringDriver(currentDriver);
                     break;
                 case REGEX:
-                    inputDriver = new RegexDriver(currentDriver);
+                    inputDriver = new RegexDriver(currentDriver.replace(RegexDriver.REGEX_PREFIX + ":", ""));
                     break;
                 case DATE_RANGE:
                     final StringTokenizer tokenizer = new StringTokenizer(

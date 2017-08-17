@@ -73,7 +73,9 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
      */
     public static Builder<RuleSetBuilder, DecisionTreeRuleSet> getCommissionRuleSetWithRegex() {
         final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder = getCommisionRuleSet();
-        addRule(ruleSetBuilder, "VOICE", "CME", "ED", "AP.?C", "RATE", null, null, 6, "1.1");
+        addRule(ruleSetBuilder, "VOICE", "CME", "NDK", "AP.?C", "INDEX", null, null, 6, "1.1");
+        addRule(ruleSetBuilder, "*", "C.?E", "S&P", "US", "INDEX", null, null, 7, "1.7");
+        addRule(ruleSetBuilder, "*", "CME", "RE:^[A-Z]{1,2}[A-Z][0-9]{1,2}$", "US", "*", null, null, 8, "1.8");
 
         return ruleSetBuilder;
     }

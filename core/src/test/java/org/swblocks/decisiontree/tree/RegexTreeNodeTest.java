@@ -45,6 +45,15 @@ public class RegexTreeNodeTest {
     }
 
     @Test
+    public void testEvaluateHatRegex() {
+        final TreeNode testNode =
+                NodeSupplier.createTreeNode(createRegexDriver("^TES.$"), NodeSupplier.ROOT_NODE_LEVEL).get();
+        assertTrue(testNode.evaluate("TEST"));
+        assertFalse(testNode.evaluate("TEST1"));
+        assertFalse(testNode.evaluate("TES"));
+    }
+
+    @Test
     public void testEvaluateMultiRegex() {
         final TreeNode testNode =
                 NodeSupplier.createTreeNode(createRegexDriver(".*Test1"), NodeSupplier.ROOT_NODE_LEVEL).get();

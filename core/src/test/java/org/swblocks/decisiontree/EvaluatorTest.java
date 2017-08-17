@@ -104,7 +104,7 @@ public class EvaluatorTest {
         final TreeNode node = constructTree(ruleSet);
 
         final Optional<UUID> result =
-                Evaluator.evaluate(Arrays.asList("VOICE", "CME", "ED", "APAC", "RATE"), null, node);
+                Evaluator.evaluate(Arrays.asList("VOICE", "CME", "NDK", "APAC", "INDEX"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 6), result.get());
     }
@@ -113,8 +113,6 @@ public class EvaluatorTest {
     public void testEvaluatorWithRegexMultipleRules() {
         final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder =
                 CommisionRuleSetSupplier.getCommissionRuleSetWithRegex();
-
-        CommisionRuleSetSupplier.addRule(ruleSetBuilder, "*", "C.?E", "S&P", "US", "INDEX", null, null, 7, "1.7");
 
         final DecisionTreeRuleSet ruleSet = ruleSetBuilder.build();
         final TreeNode node = constructTree(ruleSet);
@@ -132,7 +130,6 @@ public class EvaluatorTest {
                 "US", "INDEX"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 7), result.get());
-
     }
 
     @Test
