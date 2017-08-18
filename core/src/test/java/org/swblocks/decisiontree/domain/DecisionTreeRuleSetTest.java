@@ -129,17 +129,18 @@ public class DecisionTreeRuleSetTest {
         final DecisionTreeRuleSet commisssionRuleSet = CommisionRuleSetSupplier.getCommissionRuleSetWithRegex().build();
         List<InputDriver> driversByType = commisssionRuleSet.getDriversByType(InputValueType.STRING);
         assertNotNull(driversByType);
-        assertEquals(10, driversByType.size());
+        assertEquals(11, driversByType.size());
         assertThat(driversByType,
                 IsCollectionContaining.hasItems(new StringDriver("VOICE"), new StringDriver("RATE"),
                         new StringDriver("UK"), new StringDriver("*"), new StringDriver("CME"),
                         new StringDriver("INDEX"), new StringDriver("S&P"),
-                        new StringDriver("US"), new StringDriver("ED")));
+                        new StringDriver("US"), new StringDriver("ED"), new StringDriver("NDK")));
 
         driversByType = commisssionRuleSet.getDriversByType(InputValueType.REGEX);
         assertNotNull(driversByType);
-        assertEquals(1, driversByType.size());
-        assertThat(driversByType, IsCollectionContaining.hasItems(new RegexDriver("AP.?C")));
+        assertEquals(3, driversByType.size());
+        assertThat(driversByType, IsCollectionContaining.hasItems(new RegexDriver("AP.?C"),
+                new RegexDriver("C.?E"), new RegexDriver("^[A-Z]{1,2}[A-Z][0-9]{1,2}$")));
     }
 
     @Test

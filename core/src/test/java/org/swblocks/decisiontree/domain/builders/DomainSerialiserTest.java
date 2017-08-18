@@ -32,6 +32,7 @@ import org.hamcrest.collection.IsMapContaining;
 import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.swblocks.decisiontree.Input;
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
 import org.swblocks.decisiontree.domain.DriverCache;
 import org.swblocks.decisiontree.tree.GroupDriver;
@@ -57,40 +58,28 @@ public class DomainSerialiserTest {
 
     @Test
     public void convertStringToStringDriver() {
-        final DriverCache cache = new DriverCache();
-        final String testString = "TestString";
-        final Supplier<InputDriver> stringSupplier = DomainSerialiser.createInputDriver(testString, cache);
-        final InputDriver stringDriver = stringSupplier.get();
-        assertNotNull(stringDriver);
-        assertEquals(testString, stringDriver.getValue());
-        assertEquals(InputValueType.STRING, stringDriver.getType());
-        assertEquals(stringDriver, cache.get(testString, InputValueType.STRING));
+        testStringConversionToInputDriver("TestString", InputValueType.STRING);
+    }
 
-        final List<String> serialisedDrivers = DomainSerialiser.convertDrivers(new InputDriver[]{stringDriver});
-        assertNotNull(serialisedDrivers);
-        assertEquals(1, serialisedDrivers.size());
-        assertEquals(testString, serialisedDrivers.get(0));
+    @Test
+    public void convertStringToComplexRegExDriver() {
+        testStringConversionToInputDriver("RE:^[A-Z]{1,2}[A-Z][0-9]{1,2}$",
+                "^[A-Z]{1,2}[A-Z][0-9]{1,2}$", InputValueType.REGEX);
     }
 
     @Test
     public void convertStringToRegExDriver() {
-        final DriverCache cache = new DriverCache();
-        final String testString = "Tes.?";
-        final Supplier<InputDriver> regExSupplier = DomainSerialiser.createInputDriver(testString, cache);
-        final InputDriver regExDriver = regExSupplier.get();
-        assertNotNull(regExDriver);
-        assertEquals(testString, regExDriver.getValue());
-        assertEquals(InputValueType.REGEX, regExDriver.getType());
-        assertEquals(regExDriver, cache.get(testString, InputValueType.REGEX));
-
-        final List<String> serialisedDrivers = DomainSerialiser.convertDrivers(new InputDriver[]{regExDriver});
-        assertNotNull(serialisedDrivers);
-        assertEquals(1, serialisedDrivers.size());
-        assertEquals(testString, serialisedDrivers.get(0));
+        testStringConversionToInputDriver("Tes.?", InputValueType.REGEX);
     }
 
     @Test
     public void convertStringToDateRangeDriver() {
+        testStringConversionToInputDriver("DR:2017-07-04T16:00:00.000Z|2017-07-10T16:00:00.000Z",
+                InputValueType.DATE_RANGE);
+    }
+
+    @Test
+    public void convertStringToDateRangeDriverAndTestDates() {
         final DriverCache cache = new DriverCache();
         final String testString = "DR:2017-07-04T16:00:00.000Z|2017-07-10T16:00:00.000Z";
 
@@ -101,6 +90,27 @@ public class DomainSerialiserTest {
         assertThat(dateRangeDriver.getValue(), is(testString));
         assertThat(dateRangeDriver.evaluate("2017-07-04T16:00:00.000Z"), is(true));
         assertThat(dateRangeDriver.evaluate("2017-07-10T16:00:00.000Z"), is(false));
+    }
+
+    private void testStringConversionToInputDriver(String inputString,
+                                                   InputValueType expectedType) {
+        testStringConversionToInputDriver(inputString, inputString, expectedType);
+    }
+
+    private void testStringConversionToInputDriver(String inputString, String resultsString,
+                                                   InputValueType expectedType) {
+        final DriverCache cache = new DriverCache();
+        final Supplier<InputDriver> driverSupplier = DomainSerialiser.createInputDriver(inputString, cache);
+        final InputDriver driver = driverSupplier.get();
+        assertNotNull(driver);
+        assertEquals(resultsString, driver.getValue());
+        assertEquals(expectedType, driver.getType());
+        assertEquals(driver, cache.get(resultsString, expectedType));
+
+        final List<String> serialisedDrivers = DomainSerialiser.convertDrivers(new InputDriver[]{driver});
+        assertNotNull(serialisedDrivers);
+        assertEquals(1, serialisedDrivers.size());
+        assertEquals(resultsString, serialisedDrivers.get(0));
     }
 
     @Test (expected = IllegalStateException.class)
