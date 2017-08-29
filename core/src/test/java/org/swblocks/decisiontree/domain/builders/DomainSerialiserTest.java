@@ -272,4 +272,17 @@ public class DomainSerialiserTest {
         assertThat(outputMap, IsMapContaining.hasEntry("Driver2", "Value2"));
         assertThat(outputMap, IsMapContaining.hasEntry("Driver3", "Value3"));
     }
+
+    @Test
+    public void testInvalidOutputConversion() {
+        final List<String> outputlist = new ArrayList<>();
+        outputlist.add("Driver1:Value1");
+        outputlist.add("Driver2Value2");
+        outputlist.add("Driver3:Value3");
+
+        final Map<String, String> outputMap = DomainSerialiser.convertOutputs(outputlist);
+        assertEquals(2, outputMap.size());
+        assertThat(outputMap, IsMapContaining.hasEntry("Driver1", "Value1"));
+        assertThat(outputMap, IsMapContaining.hasEntry("Driver3", "Value3"));
+    }
 }

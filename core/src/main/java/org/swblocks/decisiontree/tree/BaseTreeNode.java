@@ -157,10 +157,6 @@ class BaseTreeNode implements TreeNode {
         return null;
     }
 
-    void setDateRange(final DateRange range) {
-        // do nothing
-    }
-
     @Override
     public InputDriver getDriver() {
         return this.driver;

@@ -110,4 +110,6 @@ public interface TreeNode {
      * @return the node date range
      */
     DateRange getDateRange();
+
+    default void setDateRange(DateRange dateRange){}
 }

@@ -85,7 +85,7 @@ final class DatedTreeNode extends BaseTreeNode {
     public TreeNode addNode(final TreeNode newNode) {
         final Optional<TreeNode> node = getExactNode(newNode);
         if (node.isPresent()) {
-            final BaseTreeNode exactNode = (BaseTreeNode) node.get();
+            final TreeNode exactNode = node.get();
             updateDateRange(exactNode, newNode.getDateRange());
             return exactNode;
         } else {
@@ -125,7 +125,7 @@ final class DatedTreeNode extends BaseTreeNode {
         return isAfterStart && isBeforeEnd;
     }
 
-    private void updateDateRange(final BaseTreeNode exactNode, final DateRange range) {
+    private void updateDateRange(final TreeNode exactNode, final DateRange range) {
         final DateRange original = exactNode.getDateRange();
         Instant start = original.getStart();
         Instant finish = original.getFinish();
