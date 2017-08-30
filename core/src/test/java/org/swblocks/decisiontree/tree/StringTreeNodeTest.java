@@ -16,12 +16,14 @@
 
 package org.swblocks.decisiontree.tree;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.swblocks.jbl.util.DateRange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -157,6 +159,8 @@ public class StringTreeNodeTest {
         final TreeNode testNode = NodeSupplier.createTreeNode(createStringDriver("TestRoot"),
                 NodeSupplier.ROOT_NODE_LEVEL).get();
 
+        assertNull(testNode.getDateRange());
+        testNode.setDateRange(new DateRange(Instant.MIN, Instant.now()));
         assertNull(testNode.getDateRange());
     }
 

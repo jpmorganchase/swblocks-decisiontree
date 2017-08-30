@@ -106,7 +106,7 @@ public final class DomainSerialiser {
      * @return the map of outputs
      */
     public static Map<String, String> convertOutputs(final List<String> outputs) {
-        return outputs.stream()
+        return outputs.stream().filter(item -> item.contains(":"))
                 .map(item -> item.split(":", 2)).collect(Collectors.toMap(item -> item[0], item -> item[1],
                         (key, value) -> key));
     }
