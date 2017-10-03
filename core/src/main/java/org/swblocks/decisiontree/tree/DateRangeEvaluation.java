@@ -19,16 +19,16 @@ package org.swblocks.decisiontree.tree;
 import java.time.Instant;
 import java.util.function.Predicate;
 import java.time.format.DateTimeFormatter;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
  * Evaluation class for evaluating String inputs of {@link Instant} formatted to {@link DateTimeFormatter#ISO_INSTANT}.
  */
 public final class DateRangeEvaluation implements Predicate<String> {
-    private final DateRange range;
+    private final Range<Instant> range;
     private final String name;
 
-    DateRangeEvaluation(final String name, final DateRange range) {
+    DateRangeEvaluation(final String name, final Range<Instant> range) {
         this.range = range;
         this.name = name;
     }
@@ -39,7 +39,7 @@ public final class DateRangeEvaluation implements Predicate<String> {
             return true;
         }
         final Instant evalInstant = Instant.parse(dateString);
-        return DateRange.RANGE_CHECK.test(this.range, evalInstant);
+        return Range.RANGE_CHECK.test(this.range, evalInstant);
     }
 
     @Override

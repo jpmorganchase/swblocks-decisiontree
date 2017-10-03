@@ -23,7 +23,7 @@ import java.util.Optional;
 
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -160,7 +160,7 @@ public class StringTreeNodeTest {
                 NodeSupplier.ROOT_NODE_LEVEL).get();
 
         assertNull(testNode.getDateRange());
-        testNode.setDateRange(new DateRange(Instant.MIN, Instant.now()));
+        testNode.setDateRange(new Range<>(Instant.MIN, Instant.now()));
         assertNull(testNode.getDateRange());
     }
 

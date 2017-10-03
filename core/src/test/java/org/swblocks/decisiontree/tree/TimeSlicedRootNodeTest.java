@@ -30,8 +30,8 @@ import org.swblocks.decisiontree.domain.DecisionTreeRule;
 import org.swblocks.decisiontree.domain.builders.RuleSetBuilder;
 import org.swblocks.decisiontree.util.CommisionRuleSetSupplier;
 import org.swblocks.jbl.builders.Builder;
-import org.swblocks.jbl.util.DateRange;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
+import org.swblocks.jbl.util.Range;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -80,15 +80,15 @@ public class TimeSlicedRootNodeTest {
                 NodeSupplier.createTimeSlicedRootNode(ruleSet).get();
         Assert.assertNotNull(timeSlicedRootNode);
 
-        assertEquals(new DateRange(Instant.parse("2013-03-28T00:00:00Z"), Instant.parse("2013-04-01T00:00:00Z")),
+        assertEquals(new Range<>(Instant.parse("2013-03-28T00:00:00Z"), Instant.parse("2013-04-01T00:00:00Z")),
                 timeSlicedRootNode.getActiveRange(Instant.parse("2013-03-28T01:00:00Z")).get());
 
-        assertEquals(new DateRange(Instant.parse("2013-04-15T00:00:00Z"), Instant.parse("2023-01-01T00:00:00Z")),
+        assertEquals(new Range<>(Instant.parse("2013-04-15T00:00:00Z"), Instant.parse("2023-01-01T00:00:00Z")),
                 timeSlicedRootNode.getActiveRange(Instant.parse("2016-01-01T00:00:00Z")).get());
 
-        assertEquals(new DateRange(Instant.parse("2013-04-15T00:00:00Z"), Instant.parse("2023-01-01T00:00:00Z")),
+        assertEquals(new Range<>(Instant.parse("2013-04-15T00:00:00Z"), Instant.parse("2023-01-01T00:00:00Z")),
                 timeSlicedRootNode.getActiveRange(Instant.parse("2013-04-15T00:00:00Z")).get());
-        assertEquals(new DateRange(Instant.parse("2013-04-15T00:00:00Z"), Instant.parse("2023-01-01T00:00:00Z")),
+        assertEquals(new Range<>(Instant.parse("2013-04-15T00:00:00Z"), Instant.parse("2023-01-01T00:00:00Z")),
                 timeSlicedRootNode.getActiveRange(Instant.parse("2022-12-31T23:59:59.999Z")).get());
 
         assertFalse(timeSlicedRootNode.getActiveRange(Instant.parse("1972-12-31T23:59:59.999Z")).isPresent());

@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 import static java.util.Collections.emptyList;
 
@@ -153,7 +153,7 @@ class BaseTreeNode implements TreeNode {
     }
 
     @Override
-    public DateRange getDateRange() {
+    public Range<Instant> getDateRange() {
         return null;
     }
 

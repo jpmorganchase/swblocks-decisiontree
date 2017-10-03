@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.jbl.eh.EhSupport;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
  * Time Sliced Root Node that retrieves and stores cached tree nodes based on a time slice.
@@ -63,18 +63,18 @@ public final class TimeSlicedRootNode implements TreeNode {
         return Collections.unmodifiableList(new ArrayList<>(times));
     }
 
-    Optional<DateRange> getActiveRange(final Instant time) {
-        final List<DateRange> slices = new ArrayList<>(1);
+    Optional<Range<Instant>> getActiveRange(final Instant time) {
+        final List<Range<Instant>> slices = new ArrayList<>(1);
         final List<Instant> times = getTimes();
 
         for (int i = 0; i < times.size() - 1; i++) {
-            final DateRange dateTimeSlice = new DateRange(times.get(i), times.get(i + 1));
+            final Range<Instant> dateTimeSlice = new Range<>(times.get(i), times.get(i + 1));
             slices.add(dateTimeSlice);
         }
 
-        DateRange activeRange = null;
-        for (final DateRange range : slices) {
-            if (DateRange.RANGE_CHECK.test(range, time)) {
+        Range<Instant> activeRange = null;
+        for (final Range<Instant> range : slices) {
+            if (Range.RANGE_CHECK.test(range, time)) {
                 activeRange = range;
                 break;
             }
@@ -86,7 +86,7 @@ public final class TimeSlicedRootNode implements TreeNode {
     Optional<DecisionTreeRuleSet> getSlicedRuleSet(final Instant time) {
         final Map<UUID, DecisionTreeRule> ruleMap = new HashMap<>();
 
-        final Optional<DateRange> activeRange = getActiveRange(time);
+        final Optional<Range<Instant>> activeRange = getActiveRange(time);
 
         if (activeRange.isPresent()) {
             this.ruleSet.getRules().forEach((ruleId, rule) -> {
@@ -127,10 +127,10 @@ public final class TimeSlicedRootNode implements TreeNode {
      * @return {@link Optional} of the root node for the decision tree.
      */
     Optional<TreeNode> getTreeNodeForTime(final Instant time) {
-        Optional<DateRange> activeRange = Optional.empty();
+        Optional<Range<Instant>> activeRange = Optional.empty();
 
-        for (final DateRange range : this.cache.keys()) {
-            if (DateRange.RANGE_CHECK.test(range, time)) {
+        for (final Range<Instant> range : this.cache.keys()) {
+            if (Range.RANGE_CHECK.test(range, time)) {
                 activeRange = Optional.of(range);
                 break;
             }
@@ -180,7 +180,7 @@ public final class TimeSlicedRootNode implements TreeNode {
     }
 
     @Override
-    public DateRange getDateRange() {
+    public Range<Instant> getDateRange() {
         return null;
     }
 }

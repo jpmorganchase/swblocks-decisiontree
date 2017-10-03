@@ -23,17 +23,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
- * Specialised {@link TreeNode} that includes a {@link DateRange} for when the node is active.
+ * Specialised {@link TreeNode} that includes a {@link Range<Instant>} for when the node is active.
  *
  * <p>Nodes are stored in {@link DecisionTreeType#DATED} decision trees.
  */
 final class DatedTreeNode extends BaseTreeNode {
-    private DateRange range;
+    private Range<Instant> range;
 
-    DatedTreeNode(final InputDriver driver, final int level, final DateRange dateRange) {
+    DatedTreeNode(final InputDriver driver, final int level, final Range<Instant> dateRange) {
         super(driver, level);
         this.range = dateRange;
     }
@@ -44,7 +44,7 @@ final class DatedTreeNode extends BaseTreeNode {
             return false;
         }
 
-        final DateRange other = ((BaseTreeNode) obj).getDateRange();
+        final Range<Instant> other = ((BaseTreeNode) obj).getDateRange();
         return Objects.equals(this.range, other) || inRange(other.getStart(), this.range) ||
                 inRange(other.getFinish(), this.range);
     }
@@ -55,12 +55,12 @@ final class DatedTreeNode extends BaseTreeNode {
     }
 
     @Override
-    public DateRange getDateRange() {
+    public Range<Instant> getDateRange() {
         return this.range;
     }
 
     @Override
-    public void setDateRange(final DateRange range) {
+    public void setDateRange(final Range<Instant> range) {
         this.range = range;
     }
 
@@ -118,15 +118,15 @@ final class DatedTreeNode extends BaseTreeNode {
         return results;
     }
 
-    private boolean inRange(final Instant time, final DateRange range) {
+    private boolean inRange(final Instant time, final Range<Instant> range) {
         final boolean isAfterStart = time.compareTo(range.getStart()) >= 0;
         final boolean isBeforeEnd = time.compareTo(range.getFinish()) <= 0;
 
         return isAfterStart && isBeforeEnd;
     }
 
-    private void updateDateRange(final TreeNode exactNode, final DateRange range) {
-        final DateRange original = exactNode.getDateRange();
+    private void updateDateRange(final TreeNode exactNode, final Range<Instant> range) {
+        final Range<Instant> original = exactNode.getDateRange();
         Instant start = original.getStart();
         Instant finish = original.getFinish();
 
@@ -141,7 +141,7 @@ final class DatedTreeNode extends BaseTreeNode {
                 finish.compareTo(original.getFinish()) != 0) {
             this.nextNodes.remove(new DatedNodeKey(exactNode.getValue(), original));
 
-            exactNode.setDateRange(new DateRange(start, finish));
+            exactNode.setDateRange(new Range<Instant>(start, finish));
             this.nextNodes.put(
                     new DatedNodeKey(exactNode.getValue(), exactNode.getDateRange()), exactNode);
         }

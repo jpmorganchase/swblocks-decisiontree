@@ -16,6 +16,7 @@
 
 package org.swblocks.decisiontree.tree;
 
+import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Optional;
@@ -24,7 +25,7 @@ import java.util.Queue;
 import org.swblocks.decisiontree.Evaluator;
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
  * Factory class used to create the required decision trees.
@@ -144,11 +145,11 @@ public final class DecisionTreeFactory {
         return NodeSupplier.createResultTreeNode(driverValue, level, rule).get();
     }
 
-    private static DateRange getDateRange(final DecisionTreeRule rule) {
+    private static Range<Instant> getDateRange(final DecisionTreeRule rule) {
         if (rule == null) {
-            return new DateRange(DecisionTreeRule.EPOCH, DecisionTreeRule.MAX);
+            return new Range<>(DecisionTreeRule.EPOCH, DecisionTreeRule.MAX);
         }
 
-        return new DateRange(rule.getStart(), rule.getEnd());
+        return new Range<>(rule.getStart(), rule.getEnd());
     }
 }

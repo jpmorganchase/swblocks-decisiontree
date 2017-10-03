@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -85,11 +85,11 @@ public class DatedTreeNodeTest {
 
         final TreeNode node = createDatedTreeNode("Test1", start, end);
 
-        DateRange range = new DateRange(start, end);
+        Range<Instant> range = new Range<>(start, end);
         assertEquals(range, node.getDateRange());
 
-        range = new DateRange(Instant.MIN, Instant.MAX);
-        ((DatedTreeNode) node).setDateRange(range);
+        range = new Range<Instant>(Instant.MIN, Instant.MAX);
+        node.setDateRange(range);
         assertEquals(range, node.getDateRange());
     }
 
@@ -143,7 +143,7 @@ public class DatedTreeNodeTest {
         final TreeNode other = createDatedTreeNode("Test1", start.minus(Period.ofWeeks(1)), end);
         root.addNode(other);
 
-        final DateRange range = new DateRange(start.minus(Period.ofWeeks(1)), end);
+        final Range<Instant> range = new Range<>(start.minus(Period.ofWeeks(1)), end);
         assertEquals(range, node.getDateRange());
     }
 
@@ -161,7 +161,7 @@ public class DatedTreeNodeTest {
         root.addNode(other);
         assertEquals(node, root.getExactNode(node).get());
 
-        final DateRange range = new DateRange(start, Instant.MAX);
+        final Range<Instant> range = new Range<>(start, Instant.MAX);
         assertEquals(range, node.getDateRange());
     }
 
@@ -229,6 +229,6 @@ public class DatedTreeNodeTest {
 
     private TreeNode createDatedTreeNode(final String value, final Instant start, final Instant end) {
         return (NodeSupplier.createDatedTreeNode(new StringDriver(value),
-                NodeSupplier.ROOT_NODE_LEVEL, new DateRange(start, end))).get();
+                NodeSupplier.ROOT_NODE_LEVEL, new Range<Instant>(start, end))).get();
     }
 }
