@@ -21,7 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import org.junit.Test;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -37,13 +37,13 @@ public class TimeSliceCacheTest {
         final TimeSliceCache timeSliceCache = TimeSliceCache.getInstance();
         final TreeNode node1 = NodeSupplier.createTreeNode(new StringDriver("Test1"),
                 NodeSupplier.ROOT_NODE_LEVEL).get();
-        final Optional<DateRange> range1 = Optional.of(new DateRange(now.minus(10, ChronoUnit.DAYS),
+        final Optional<Range<Instant>> range1 = Optional.of(new Range<>(now.minus(10, ChronoUnit.DAYS),
                 now.minus(5, ChronoUnit.DAYS)));
         final TreeNode node2 = NodeSupplier.createTreeNode(new StringDriver("Test2"),
                 NodeSupplier.ROOT_NODE_LEVEL).get();
-        final Optional<DateRange> range2 = Optional.of(new DateRange(now.plus(1, ChronoUnit.DAYS),
+        final Optional<Range<Instant>> range2 = Optional.of(new Range<>(now.plus(1, ChronoUnit.DAYS),
                 now.plus(10, ChronoUnit.DAYS)));
-        final Optional<DateRange> range3 = Optional.of(new DateRange(now.plus(11, ChronoUnit.DAYS),
+        final Optional<Range<Instant>> range3 = Optional.of(new Range<>(now.plus(11, ChronoUnit.DAYS),
                 now.plus(20, ChronoUnit.DAYS)));
 
         timeSliceCache.put(range1.get(), Optional.of(node1));
@@ -53,7 +53,7 @@ public class TimeSliceCacheTest {
         assertEquals(node2, timeSliceCache.get(range2).get());
         assertFalse(timeSliceCache.get(range3).isPresent());
 
-        final DateRange[] sliceSet = timeSliceCache.keys();
+        final Range<Instant>[] sliceSet = timeSliceCache.keys();
         assertEquals(sliceSet.length, 2);
     }
 }

@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.Test;
-import org.swblocks.jbl.util.DateRange;
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
+import org.swblocks.jbl.util.Range;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -77,7 +77,7 @@ public class ResultNodeTest {
         final InputDriver driverValue = baseTreeNode.getDriver();
         assertTrue(driverValue.getValue().equals("TestInput"));
 
-        final DateRange range = new DateRange(Instant.EPOCH, DecisionTreeRule.MAX);
+        final Range<Instant> range = new Range<>(Instant.EPOCH, DecisionTreeRule.MAX);
         assertEquals(range, treeNode.getDateRange());
     }
 

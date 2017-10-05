@@ -20,7 +20,7 @@ import java.time.Instant;
 
 import org.junit.Test;
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,9 +32,9 @@ import static org.junit.Assert.assertTrue;
 public class DatedNodeKeyTest {
     @Test
     public void equalsCorrect() {
-        DatedNodeKey key = new DatedNodeKey("test1", new DateRange(DecisionTreeRule.EPOCH, DecisionTreeRule.MAX));
+        DatedNodeKey key = new DatedNodeKey("test1", new Range<>(DecisionTreeRule.EPOCH, DecisionTreeRule.MAX));
         final DatedNodeKey sameKey = new DatedNodeKey("test1",
-                new DateRange(DecisionTreeRule.EPOCH, DecisionTreeRule.MAX));
+                new Range<>(DecisionTreeRule.EPOCH, DecisionTreeRule.MAX));
 
         assertTrue(key.equals(key));
         assertTrue(key.equals(sameKey));
@@ -42,19 +42,19 @@ public class DatedNodeKeyTest {
         assertFalse(key.equals(new Integer(1)));
 
         DatedNodeKey otherKeyValue = new DatedNodeKey("test2",
-                new DateRange(DecisionTreeRule.EPOCH, DecisionTreeRule.MAX));
+                new Range<>(DecisionTreeRule.EPOCH, DecisionTreeRule.MAX));
         assertFalse(key.equals(otherKeyValue));
 
-        otherKeyValue = new DatedNodeKey("test1", new DateRange(Instant.now(), DecisionTreeRule.MAX));
+        otherKeyValue = new DatedNodeKey("test1", new Range<>(Instant.now(), DecisionTreeRule.MAX));
         assertFalse(key.equals(otherKeyValue));
 
-        otherKeyValue = new DatedNodeKey("test1", new DateRange(DecisionTreeRule.EPOCH, Instant.now()));
+        otherKeyValue = new DatedNodeKey("test1", new Range<>(DecisionTreeRule.EPOCH, Instant.now()));
         assertFalse(key.equals(otherKeyValue));
 
-        otherKeyValue = new DatedNodeKey("test1", new DateRange(DecisionTreeRule.EPOCH, null));
+        otherKeyValue = new DatedNodeKey("test1", new Range<>(DecisionTreeRule.EPOCH, null));
         assertFalse(key.equals(otherKeyValue));
 
-        otherKeyValue = new DatedNodeKey("test1", new DateRange(null, DecisionTreeRule.MAX));
+        otherKeyValue = new DatedNodeKey("test1", new Range<>(null, DecisionTreeRule.MAX));
         assertFalse(key.equals(otherKeyValue));
 
         otherKeyValue = new DatedNodeKey("test1", null);
@@ -63,15 +63,15 @@ public class DatedNodeKeyTest {
         key = new DatedNodeKey("test1", null);
         assertTrue(key.equals(otherKeyValue));
 
-        otherKeyValue = new DatedNodeKey("test2", new DateRange(DecisionTreeRule.EPOCH, DecisionTreeRule.MAX));
+        otherKeyValue = new DatedNodeKey("test2", new Range<>(DecisionTreeRule.EPOCH, DecisionTreeRule.MAX));
         assertFalse(key.equals(otherKeyValue));
     }
 
     @Test
     public void hashCodeCorrect() {
-        final DatedNodeKey key = new DatedNodeKey("test1", new DateRange(DecisionTreeRule.EPOCH,
+        final DatedNodeKey key = new DatedNodeKey("test1", new Range<>(DecisionTreeRule.EPOCH,
                 DecisionTreeRule.MAX));
-        final DatedNodeKey other = new DatedNodeKey("test1", new DateRange(DecisionTreeRule.EPOCH,
+        final DatedNodeKey other = new DatedNodeKey("test1", new Range<>(DecisionTreeRule.EPOCH,
                 DecisionTreeRule.MAX));
         assertEquals(key.hashCode(), other.hashCode());
     }

@@ -16,22 +16,23 @@
 
 package org.swblocks.decisiontree.tree;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import org.swblocks.jbl.cache.LruCache;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
- * LRUCache storing a map with a key of {@link DateRange} hashCode and an {@link Optional} value of {@link TreeNode}.
+ * LRUCache storing a map with a key of {@link Range} hashCode and an {@link Optional} value of {@link TreeNode}.
  *
  * <p>Used for storing time sliced trees once they have been built.
  */
 public class TimeSliceCache {
     private static final int MAX_CACHE_SIZE = 20;
-    private final Map<DateRange, Optional<TreeNode>> cache;
+    private final Map<Range<Instant>, Optional<TreeNode>> cache;
 
     private TimeSliceCache() {
         this.cache = Collections.synchronizedMap(LruCache.getCache(MAX_CACHE_SIZE, MAX_CACHE_SIZE, 0.75F));
@@ -41,17 +42,17 @@ public class TimeSliceCache {
         return new TimeSliceCache();
     }
 
-    public void put(final DateRange range, final Optional<TreeNode> node) {
+    public void put(final Range<Instant> range, final Optional<TreeNode> node) {
         this.cache.putIfAbsent(range, node);
     }
 
     /**
-     * Gets the {@link Optional} {@link TreeNode} from the cache which matches the {@link DateRange} passed in.
+     * Gets the {@link Optional} {@link TreeNode} from the cache which matches the {@link Range} passed in.
      *
-     * @param range {@link DateRange} to match against.
+     * @param range {@link Range} to match against.
      * @return The {@link Optional} {@link TreeNode} from the cache, {@code Optional.empty()} if not in cache.
      */
-    public Optional<TreeNode> get(final Optional<DateRange> range) {
+    public Optional<TreeNode> get(final Optional<Range<Instant>> range) {
         if (range.isPresent()) {
             final Optional<TreeNode> treeNode = this.cache.get(range.get());
             if (treeNode != null) {
@@ -61,8 +62,8 @@ public class TimeSliceCache {
         return Optional.empty();
     }
 
-    public DateRange[] keys() {
-        final Set<DateRange> keys = this.cache.keySet();
-        return keys.toArray(new DateRange[keys.size()]);
+    public Range<Instant>[] keys() {
+        final Set<Range<Instant>> keys = this.cache.keySet();
+        return keys.toArray(new Range[keys.size()]);
     }
 }

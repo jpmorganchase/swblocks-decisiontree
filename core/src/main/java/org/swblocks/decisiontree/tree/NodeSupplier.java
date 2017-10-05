@@ -16,11 +16,12 @@
 
 package org.swblocks.decisiontree.tree;
 
+import java.time.Instant;
 import java.util.function.Supplier;
 
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
  * Class that creates the various types of tree node that are used in the construction of the decision tree.
@@ -56,8 +57,8 @@ final class NodeSupplier {
         return () -> new BaseTreeNode(driver, level);
     }
 
-    static Supplier<TreeNode> createDatedTreeNode(final InputDriver driver, final int level, final DateRange
-            dateRange) {
+    static Supplier<TreeNode> createDatedTreeNode(final InputDriver driver, final int level,
+                                                  final Range<Instant> dateRange) {
         return () -> new DatedTreeNode(driver, level, dateRange);
     }
 
@@ -76,7 +77,7 @@ final class NodeSupplier {
     static Supplier<TreeNode> createDatedResultTreeNode(final InputDriver driver,
                                                         final int level,
                                                         final DecisionTreeRule rule) {
-        return createResultTreeNode(rule, createDatedTreeNode(driver, level, new DateRange(rule.getStart(),
+        return createResultTreeNode(rule, createDatedTreeNode(driver, level, new Range<>(rule.getStart(),
                 rule.getEnd())).get());
     }
 

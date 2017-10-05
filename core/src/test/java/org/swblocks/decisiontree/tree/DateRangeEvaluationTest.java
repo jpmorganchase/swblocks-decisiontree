@@ -21,7 +21,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 
 import org.junit.Test;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 public class DateRangeEvaluationTest {
     @Test
     public void evaluation() {
-        final DateRange testRange = new DateRange(Instant.now(), Instant.now().plus(7, ChronoUnit.DAYS));
+        final Range<Instant> testRange = new Range<>(Instant.now(), Instant.now().plus(7, ChronoUnit.DAYS));
         final DateRangeEvaluation driver = new DateRangeEvaluation("TestRange", testRange);
 
         assertTrue(driver.test(Instant.now().plus(1, ChronoUnit.DAYS).toString()));
@@ -49,7 +49,7 @@ public class DateRangeEvaluationTest {
 
     @Test (expected = DateTimeParseException.class)
     public void failEvaluationNotADate() {
-        final DateRange testRange = new DateRange(Instant.now(), Instant.now().plus(7, ChronoUnit.DAYS));
+        final Range<Instant> testRange = new Range<>(Instant.now(), Instant.now().plus(7, ChronoUnit.DAYS));
         final DateRangeEvaluation driver = new DateRangeEvaluation("TestRange", testRange);
         // Fail any none date input
         driver.test("not a date");
@@ -57,7 +57,7 @@ public class DateRangeEvaluationTest {
 
     @Test
     public void hashCodeValue() {
-        final DateRange testRange = new DateRange(Instant.now(), Instant.now().plus(7, ChronoUnit.DAYS));
+        final Range<Instant> testRange = new Range<>(Instant.now(), Instant.now().plus(7, ChronoUnit.DAYS));
         final DateRangeEvaluation driver = new DateRangeEvaluation("TestRange", testRange);
         assertEquals(new DateRangeEvaluation("TestRange", null).hashCode(), driver.hashCode());
     }

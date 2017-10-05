@@ -23,11 +23,11 @@ import java.util.UUID;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.swblocks.jbl.util.DateRange;
 import com.google.code.tempusfugit.concurrency.ConcurrentRule;
 import com.google.code.tempusfugit.concurrency.RepeatingRule;
 import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.google.code.tempusfugit.concurrency.annotations.Repeating;
+import org.swblocks.jbl.util.Range;
 
 /**
  * Concurrent test of the {@link TimeSliceCache} to ensure no concurrent modification exceptions are thrown.
@@ -48,14 +48,14 @@ public class TimeSliceCacheConcurrencyTest {
         final int start = (int) (Math.random() * 100);
         final int end = start + (int) (Math.random() * 100);
 
-        final DateRange dateRange = new DateRange(now.plus(Period.ofWeeks(start)), now.plus(Period.ofWeeks(end)));
+        final Range<Instant> dateRange = new Range<>(now.plus(Period.ofWeeks(start)), now.plus(Period.ofWeeks(end)));
         final TreeNode node = NodeSupplier.createTreeNode(
                 new StringDriver(UUID.randomUUID().toString()), NodeSupplier.ROOT_NODE_LEVEL).get();
 
         final Optional<TreeNode> treeNode = Optional.of(node);
         this.cache.put(dateRange, treeNode);
 
-        for (final DateRange dr : this.cache.keys()) {
+        for (final Range<Instant> dr : this.cache.keys()) {
             this.cache.get(Optional.of(dr));
         }
 

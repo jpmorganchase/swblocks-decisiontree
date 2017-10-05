@@ -16,9 +16,10 @@
 
 package org.swblocks.decisiontree.tree;
 
+import java.time.Instant;
 import java.util.Objects;
 
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
  * Node key for time dated decision trees.
@@ -26,15 +27,15 @@ import org.swblocks.jbl.util.DateRange;
  * <p>Requires a string value and the date range
  */
 final class DatedNodeKey {
-    private final DateRange range;
+    private final Range<Instant> range;
     private final String value;
 
-    DatedNodeKey(final String value, final DateRange range) {
+    DatedNodeKey(final String value, final Range<Instant> range) {
         this.value = value;
         this.range = range;
     }
 
-    public DateRange getRange() {
+    public Range<Instant> getRange() {
         return this.range;
     }
 

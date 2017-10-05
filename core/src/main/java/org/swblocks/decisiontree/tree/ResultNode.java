@@ -16,13 +16,14 @@
 
 package org.swblocks.decisiontree.tree;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
 
 import org.swblocks.decisiontree.EvaluationResult;
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
  * Final leaf node that matches a rule.
@@ -34,7 +35,7 @@ import org.swblocks.jbl.util.DateRange;
 final class ResultNode extends BaseTreeNode implements EvaluationResult, TreeNode {
     private final UUID ruleIdentifier;
     private final long weight;
-    private final DateRange range;
+    private final Range<Instant> range;
 
     ResultNode(final InputDriver driver,
                final int driverLevel,
@@ -58,7 +59,7 @@ final class ResultNode extends BaseTreeNode implements EvaluationResult, TreeNod
     }
 
     @Override
-    public DateRange getDateRange() {
+    public Range<Instant> getDateRange() {
         return this.range;
     }
 

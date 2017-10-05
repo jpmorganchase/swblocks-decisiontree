@@ -27,8 +27,8 @@ import org.junit.Test;
 import org.swblocks.decisiontree.domain.builders.RuleSetBuilder;
 import org.swblocks.decisiontree.util.CommisionRuleSetSupplier;
 import org.swblocks.jbl.builders.Builder;
-import org.swblocks.jbl.util.DateRange;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
+import org.swblocks.jbl.util.Range;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -315,7 +315,7 @@ public class DatedDecisionTreeFactoryTest {
                                 final Instant end) {
         assertEquals(value, treeNode.getValue());
         assertEquals(level, treeNode.getDriverLevel());
-        final DateRange dateRange = treeNode.getDateRange();
+        final Range<Instant> dateRange = treeNode.getDateRange();
         assertEquals(start, dateRange.getStart());
         assertEquals(end, dateRange.getFinish());
         assertFalse(treeNode.getFailureNode().isPresent());

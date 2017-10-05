@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
  * TreeNode is the base interface for all decision tree nodes.
@@ -109,7 +109,7 @@ public interface TreeNode {
      *
      * @return the node date range
      */
-    DateRange getDateRange();
+    Range<Instant> getDateRange();
 
-    default void setDateRange(DateRange dateRange){}
+    default void setDateRange(Range<Instant> dateRange){}
 }
