@@ -16,22 +16,15 @@
 
 package org.swblocks.decisiontree.tree;
 
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.function.Predicate;
-
 import org.swblocks.jbl.util.Range;
 
 /**
- * Evaluation class for evaluating String inputs of {@link Instant} formatted to {@link DateTimeFormatter#ISO_INSTANT}.
+ * Driver holding a {@link Range} typed with an {@link Integer}.
  */
-public final class DateRangeEvaluation extends GenericRangeEvaluation<Instant> implements Predicate<String> {
-    DateRangeEvaluation(String name, Range<Instant> range) {
-        super(name, range);
-    }
+public class IntegerRangeDriver extends InputDriver {
+    public static final String IR_PREFIX = "IR";
 
-    @Override
-    protected Instant parse(String value) {
-        return Instant.parse(value);
+    public IntegerRangeDriver(String name, Range<Integer> range) {
+        super(name, InputValueType.INTEGER_RANGE, new IntegerRangeEvaluation(name, range));
     }
 }

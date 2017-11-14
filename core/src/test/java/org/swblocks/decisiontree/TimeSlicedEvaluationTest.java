@@ -76,7 +76,7 @@ public class TimeSlicedEvaluationTest {
          */
         final Instant evaluation = Instant.parse("2013-04-10T00:00:00.Z");
 
-        final Optional<UUID> result = Evaluator.evaluate(this.inputA, evaluation, this.rootNode);
+        final Optional<UUID> result = Evaluator.singleEvaluate(this.inputA, evaluation, this.rootNode);
         assertTrue(result.isPresent());
 
         assertEquals(new UUID(0, 6L), result.get());
@@ -89,7 +89,7 @@ public class TimeSlicedEvaluationTest {
          */
         final Instant evaluation = Instant.parse("2013-04-07T05:00:00.Z");
 
-        final Optional<UUID> result = Evaluator.evaluate(this.inputA, evaluation, this.rootNode);
+        final Optional<UUID> result = Evaluator.singleEvaluate(this.inputA, evaluation, this.rootNode);
         assertTrue(result.isPresent());
 
         assertEquals(new UUID(0, 5L), result.get());
@@ -101,7 +101,7 @@ public class TimeSlicedEvaluationTest {
          * Applicable time slice: 2013-04-01T00:00:00Z to 2013-04-01T00:00:01Z.
          */
         final Instant evaluation = Instant.parse("2013-04-01T00:00:00.Z");
-        final Optional<UUID> result = Evaluator.evaluate(this.inputA, evaluation, this.rootNode);
+        final Optional<UUID> result = Evaluator.singleEvaluate(this.inputA, evaluation, this.rootNode);
         assertTrue(result.isPresent());
 
         assertEquals(new UUID(0, 9L), result.get());
@@ -113,7 +113,7 @@ public class TimeSlicedEvaluationTest {
          * Applicable time slice: 2013-04-15T00:00:00Z to 2023-01-01T00:00:00Z.
          */
         final Instant evaluation = Instant.parse("2016-12-01T00:00:00.Z");
-        final Optional<UUID> result = Evaluator.evaluate(this.inputB, evaluation, this.rootNode);
+        final Optional<UUID> result = Evaluator.singleEvaluate(this.inputB, evaluation, this.rootNode);
         assertFalse(result.isPresent());
     }
 

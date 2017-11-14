@@ -17,8 +17,10 @@
 package org.swblocks.decisiontree;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.decisiontree.tree.DecisionTreeFactory;
@@ -108,14 +110,48 @@ public class DecisionTree {
      * @param input Search values to be used.
      * @return {@link Optional} Output holder for the results.
      */
-    public Optional<OutputResults> getEvaluationFor(final Input input) {
+    public Optional<OutputResults> getSingleEvaluationFor(final Input input) {
         final TreeNode rootNodeToTree = this.node;
-        final Optional<UUID> result = Evaluator.evaluate(input.getEvaluationInputs(), input.getEvaluationDate(),
+        final Optional<UUID> result = Evaluator.singleEvaluate(input.getEvaluationInputs(), input.getEvaluationDate(),
                 rootNodeToTree);
         if (result.isPresent()) {
             return Optional.of(new OutputResults(this.ruleSet.getRules().get(result.get())));
         }
         return Optional.empty();
+    }
+
+    /**
+     * @param input Search values to be used.
+     * @return {@link Optional} Output holder for the results.
+     * @deprecated use {@link #getSingleEvaluationFor(Input)}. Evaluates the {@link Input} data against the Decision
+     * Tree.
+     *
+     * <p>Decision tree root nodes are cached in this class when evaluating single node trees or dated time trees. The
+     * time sliced root node caches the individual time sliced trees separately and so the caching is delegated to the
+     * {@link TimeSlicedRootNode} class.
+     */
+    @Deprecated
+    public Optional<OutputResults> getEvaluationFor(final Input input) {
+        return getSingleEvaluationFor(input);
+    }
+
+    /**
+     * Evaluates the {@link Input} data against the Decision Tree returning all highest weighted results.
+     *
+     * <p>Decision tree root nodes are cached in this class when evaluating single node trees or dated time trees. The
+     * time sliced root node caches the individual time sliced trees separately and so the caching is delegated to the
+     * {@link TimeSlicedRootNode} class.
+     *
+     * @param input Search values to be used.
+     * @return {@link List} of highest weighted results.
+     */
+    public List<OutputResults> getEvaluationsFor(final Input input) {
+        final TreeNode rootNodeToTree = this.node;
+        final List<UUID> result = Evaluator.evaluate(input.getEvaluationInputs(), input.getEvaluationDate(),
+                rootNodeToTree);
+
+        return result.stream().map(uuid ->
+                new OutputResults(this.ruleSet.getRules().get(uuid))).collect(Collectors.toList());
     }
 
     protected void initialiseRootNode() {

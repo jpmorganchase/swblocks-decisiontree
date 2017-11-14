@@ -32,7 +32,6 @@ import org.hamcrest.collection.IsMapContaining;
 import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.swblocks.decisiontree.Input;
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
 import org.swblocks.decisiontree.domain.DriverCache;
 import org.swblocks.decisiontree.tree.GroupDriver;
@@ -63,7 +62,7 @@ public class DomainSerialiserTest {
 
     @Test
     public void convertStringToComplexRegExDriver() {
-        testStringConversionToInputDriver("RE:^[A-Z]{1,2}[A-Z][0-9]{1,2}$",
+        testStringConversionToInputDriver(InputBuilder.RegExInput("^[A-Z]{1,2}[A-Z][0-9]{1,2}$"),
                 "^[A-Z]{1,2}[A-Z][0-9]{1,2}$", InputValueType.REGEX);
     }
 
@@ -79,6 +78,12 @@ public class DomainSerialiserTest {
     }
 
     @Test
+    public void convertStringToIntegerRangeDriver() {
+        testStringConversionToInputDriver("IR:500|12345",
+                InputValueType.INTEGER_RANGE);
+    }
+
+    @Test
     public void convertStringToDateRangeDriverAndTestDates() {
         final DriverCache cache = new DriverCache();
         final String testString = "DR:2017-07-04T16:00:00.000Z|2017-07-10T16:00:00.000Z";
@@ -90,6 +95,57 @@ public class DomainSerialiserTest {
         assertThat(dateRangeDriver.getValue(), is(testString));
         assertThat(dateRangeDriver.evaluate("2017-07-04T16:00:00.000Z"), is(true));
         assertThat(dateRangeDriver.evaluate("2017-07-10T16:00:00.000Z"), is(false));
+    }
+
+    @Test
+    public void convertStringToIntegerRangeAndTestData() {
+        final DriverCache cache = new DriverCache();
+        final String testString = "IR:100|12345";
+        final Supplier<InputDriver> rangeSupplier = DomainSerialiser.createInputDriver(testString, cache);
+        final InputDriver intRangeDriver = rangeSupplier.get();
+        assertNotNull(intRangeDriver);
+        assertThat(intRangeDriver.getType(), is(InputValueType.INTEGER_RANGE));
+        assertThat(intRangeDriver.getValue(), is(testString));
+        assertThat(intRangeDriver.evaluate("123"), is(true));
+        assertThat(intRangeDriver.evaluate("54321"), is(false));
+    }
+
+    @Test
+    public void convertStringToIntegerRangeWithMax() {
+        final DriverCache cache = new DriverCache();
+        final String testString = "IR:100|";
+        final Supplier<InputDriver> rangeSupplier = DomainSerialiser.createInputDriver(testString, cache);
+        final InputDriver intRangeDriver = rangeSupplier.get();
+        assertNotNull(intRangeDriver);
+        assertThat(intRangeDriver.getType(), is(InputValueType.INTEGER_RANGE));
+        assertThat(intRangeDriver.getValue(), is(testString));
+        assertThat(intRangeDriver.evaluate("123"), is(true));
+        Integer maxInt = new Integer(Integer.MAX_VALUE);
+        assertThat(intRangeDriver.evaluate(maxInt.toString()), is(false));
+        Integer almostMaxInt = new Integer(Integer.MAX_VALUE - 1);
+        assertThat(intRangeDriver.evaluate(almostMaxInt.toString()), is(true));
+    }
+
+    @Test
+    public void convertStringToIntegerRangeWithMin() {
+        final DriverCache cache = new DriverCache();
+        final String testString = "IR:|100";
+        final Supplier<InputDriver> rangeSupplier = DomainSerialiser.createInputDriver(testString, cache);
+        final InputDriver intRangeDriver = rangeSupplier.get();
+        assertNotNull(intRangeDriver);
+        assertThat(intRangeDriver.getType(), is(InputValueType.INTEGER_RANGE));
+        assertThat(intRangeDriver.getValue(), is(testString));
+        assertThat(intRangeDriver.evaluate("12"), is(true));
+        Integer minInt = new Integer(Integer.MIN_VALUE);
+        assertThat(intRangeDriver.evaluate(minInt.toString()), is(true));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void convertStringToIntegerRangeWithMissingDeliminator() {
+        final DriverCache cache = new DriverCache();
+        final String testString = "IR:1223";
+        final Supplier<InputDriver> rangeSupplier = DomainSerialiser.createInputDriver(testString, cache);
+        final InputDriver intRangeDriver = rangeSupplier.get();
     }
 
     private void testStringConversionToInputDriver(String inputString,

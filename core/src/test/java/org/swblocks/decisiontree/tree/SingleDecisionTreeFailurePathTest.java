@@ -23,10 +23,10 @@ import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
 import org.swblocks.decisiontree.Evaluator;
-import org.swblocks.jbl.builders.Builder;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.decisiontree.domain.builders.RuleBuilder;
 import org.swblocks.decisiontree.domain.builders.RuleSetBuilder;
+import org.swblocks.jbl.builders.Builder;
 
 /**
  * Failure Path test cases for {@link DecisionTreeFactory} creating a single decision tree.
@@ -46,11 +46,11 @@ public class SingleDecisionTreeFailurePathTest {
 
         final TreeNode node = constructTree(ruleSetBuilder);
         // This will fail as there is no wildcards on the TWO path.
-        Optional<UUID> result = Evaluator.evaluate(Arrays.asList("TWO", "NOT TWO", "TWO"), null, node);
+        Optional<UUID> result = Evaluator.singleEvaluate(Arrays.asList("TWO", "NOT TWO", "TWO"), null, node);
         Assert.assertFalse(result.isPresent());
 
         // This will succeed by following the failure path from the first rile to the second rule.
-        result = Evaluator.evaluate(Arrays.asList("ONE", "ONE", "NOT ONE"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("ONE", "ONE", "NOT ONE"), null, node);
         Assert.assertTrue(result.isPresent());
     }
 
@@ -71,7 +71,7 @@ public class SingleDecisionTreeFailurePathTest {
 
         final TreeNode node = constructTree(ruleSetBuilder);
 
-        final Optional<UUID> result = Evaluator.evaluate(Arrays.asList("ONE", "TWO", "THREE", "FOUR"), null, node);
+        final Optional<UUID> result = Evaluator.singleEvaluate(Arrays.asList("ONE", "TWO", "THREE", "FOUR"), null, node);
         Assert.assertTrue(result.isPresent());
         Assert.assertEquals(new UUID(0, 2), result.get());
     }

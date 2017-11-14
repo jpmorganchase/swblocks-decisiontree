@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Test;
+import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.decisiontree.domain.builders.RuleBuilder;
 import org.swblocks.decisiontree.domain.builders.RuleSetBuilder;
 import org.swblocks.decisiontree.tree.DecisionTreeFactory;
@@ -32,7 +33,6 @@ import org.swblocks.decisiontree.tree.TreeNode;
 import org.swblocks.decisiontree.util.CommisionRuleSetSupplier;
 import org.swblocks.jbl.builders.Builder;
 import org.swblocks.jbl.test.utils.JblTestClassUtils;
-import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
@@ -54,46 +54,46 @@ public class EvaluatorTest {
         final DecisionTreeRuleSet ruleSet = CommisionRuleSetSupplier.getCommisionRuleSet().build();
         final TreeNode node = constructTree(ruleSet);
 
-        Optional<UUID> result = Evaluator.evaluate(Arrays.asList("VOICE", "CME", "ED", "US", "RATE"), null, node);
+        Optional<UUID> result = Evaluator.singleEvaluate(Arrays.asList("VOICE", "CME", "ED", "US", "RATE"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 2), result.get());
 
-        result = Evaluator.evaluate(Arrays.asList("VOICE", "CME", "EB", "US", "RATE"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("VOICE", "CME", "EB", "US", "RATE"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 3), result.get());
 
-        result = Evaluator.evaluate(Arrays.asList("VOICE", "CME", "S&P", "US", "INDEX"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("VOICE", "CME", "S&P", "US", "INDEX"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 3), result.get());
 
-        result = Evaluator.evaluate(Arrays.asList("ELECTRONIC", "CME", "S&P", "US", "INDEX"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("ELECTRONIC", "CME", "S&P", "US", "INDEX"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 1), result.get());
 
-        result = Evaluator.evaluate(Arrays.asList("ELECTRONIC", "LIFFE", "L", "UK", "INDEX"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("ELECTRONIC", "LIFFE", "L", "UK", "INDEX"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 5), result.get());
 
-        result = Evaluator.evaluate(Arrays.asList("ELECTRONIC", "CME", "EB", "US", "RATE"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("ELECTRONIC", "CME", "EB", "US", "RATE"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 4), result.get());
 
-        result = Evaluator.evaluate(Arrays.asList("VOICE", "LIFFE", "L", "UK", "INDEX"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("VOICE", "LIFFE", "L", "UK", "INDEX"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 5), result.get());
 
-        result = Evaluator.evaluate(Arrays.asList("VOICE", "CME", "ED", "UK", "INDEX"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("VOICE", "CME", "ED", "UK", "INDEX"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 0), result.get());
 
-        result = Evaluator.evaluate(Arrays.asList("VOICE", "CME", "ED", "UK", "BOND"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("VOICE", "CME", "ED", "UK", "BOND"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 5), result.get());
 
-        result = Evaluator.evaluate(Arrays.asList("ELECTRONIC", "EURONEXT", "DEX", "EU", "BOND"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("ELECTRONIC", "EURONEXT", "DEX", "EU", "BOND"), null, node);
         assertFalse(result.isPresent());
 
-        result = Evaluator.evaluate(Arrays.asList("VOICE", "CME", "ED", "EU", "BOND"), null, node);
+        result = Evaluator.singleEvaluate(Arrays.asList("VOICE", "CME", "ED", "EU", "BOND"), null, node);
         assertFalse(result.isPresent());
 
     }
@@ -104,7 +104,7 @@ public class EvaluatorTest {
         final TreeNode node = constructTree(ruleSet);
 
         final Optional<UUID> result =
-                Evaluator.evaluate(Arrays.asList("VOICE", "CME", "NDK", "APAC", "INDEX"), null, node);
+                Evaluator.singleEvaluate(Arrays.asList("VOICE", "CME", "NDK", "APAC", "INDEX"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 6), result.get());
     }
@@ -126,7 +126,7 @@ public class EvaluatorTest {
                 .collect(Collectors.toList());
         assertThat(idResults, IsCollectionContaining.hasItems(new UUID(0, 0), new UUID(0, 1), new UUID(0, 7)));
 
-        final Optional<UUID> result = Evaluator.evaluate(Arrays.asList("ELECTRONIC", "CME", "S&P",
+        final Optional<UUID> result = Evaluator.singleEvaluate(Arrays.asList("ELECTRONIC", "CME", "S&P",
                 "US", "INDEX"), null, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 7), result.get());
@@ -167,7 +167,7 @@ public class EvaluatorTest {
         final DecisionTreeRuleSet ruleSet = ruleSetBuilder.build();
         final TreeNode node = constructTree(ruleSet);
 
-        final Optional<UUID> result = Evaluator.evaluate(Arrays.asList("CLM", "A102059551", "0152035", "0151488",
+        final Optional<UUID> result = Evaluator.singleEvaluate(Arrays.asList("CLM", "A102059551", "0152035", "0151488",
                 "ELEC", "NMEM", "FUTURE", "Y2", "381", "Equity indices", "IFLL", "ER"), null, node);
         assertTrue(result.isPresent());
 

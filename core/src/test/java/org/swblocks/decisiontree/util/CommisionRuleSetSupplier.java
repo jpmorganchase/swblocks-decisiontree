@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.swblocks.decisiontree.Loader;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.decisiontree.domain.ValueGroup;
+import org.swblocks.decisiontree.domain.builders.InputBuilder;
 import org.swblocks.decisiontree.domain.builders.RuleBuilder;
 import org.swblocks.decisiontree.domain.builders.RuleSetBuilder;
 import org.swblocks.decisiontree.tree.DecisionTreeFactory;
@@ -75,7 +76,9 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
         final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder = getCommisionRuleSet();
         addRule(ruleSetBuilder, "VOICE", "CME", "NDK", "AP.?C", "INDEX", null, null, 6, "1.1");
         addRule(ruleSetBuilder, "*", "C.?E", "S&P", "US", "INDEX", null, null, 7, "1.7");
-        addRule(ruleSetBuilder, "*", "CME", "RE:^[A-Z]{1,2}[A-Z][0-9]{1,2}$", "US", "*", null, null, 8, "1.8");
+        addRule(ruleSetBuilder, "*", "CME",
+                InputBuilder.RegExInput("^[A-Z]{1,2}[A-Z][0-9]{1,2}$"),
+                "US", "*", null, null, 8, "1.8");
 
         return ruleSetBuilder;
     }
@@ -179,6 +182,29 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
     }
 
     /**
+     * Creates the basic Commission ruleset.
+     */
+    public static Builder<RuleSetBuilder, DecisionTreeRuleSet> getCommisionRuleSetWithNotionalRanges() {
+        final UUID id = new UUID(0, 1);
+        final Set<ValueGroup> groups = Collections.singleton(new ValueGroup(id, "CMEGroup",
+                Arrays.asList("CME", "CBOT"), ValueGroup.DEFAULT_DATE_RANGE));
+
+        final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder = RuleSetBuilder.creator("commissions",
+                Arrays.asList("EXMETHOD", "EXCHANGE", "PRODUCT", "REGION", "ASSET", "NOTIONAL"));
+        ruleSetBuilder.with(RuleSetBuilder::groups, groups);
+        addRule(ruleSetBuilder, "*", GroupDriver.VG_PREFIX + id, "*", "*", "INDEX", "IR:1000|5000", null, null, 0, "1.11");
+        addRule(ruleSetBuilder, "*", GroupDriver.VG_PREFIX + id, "*", "*", "INDEX", "IR:5000|10000", null, null, 1, "1.12");
+        addRule(ruleSetBuilder, "*", "CME", "S&P", "*", "INDEX", "", null, null, 2, "1.2");
+        addRule(ruleSetBuilder, "VOICE", "CME", "ED", "*", "RATE", "", null, null, 3, "1.4");
+        addRule(ruleSetBuilder, "VOICE", "*", "*", "US", "*", "", null, null, 4, "1.5");
+        addRule(ruleSetBuilder, "*", "*", "*", "US", "*", "", null, null, 5, "1.2");
+        addRule(ruleSetBuilder, "*", "*", "*", "UK", "*", "", null, null, 6, "1.1");
+        addRule(ruleSetBuilder, "*", "*", "*", "UK", "*", "IR:1000|50000", null, null, 7, "1.17");
+        addRule(ruleSetBuilder, "*", "*", "*", "UK", "*", "IR:500|5000", null, null, 8, "1.18");
+        return ruleSetBuilder;
+    }
+
+    /**
      * Creates a large ruleset based on the inputs.
      *
      * <p>It is possible that random number generation would create duplicate rules, so that the final total number
@@ -237,6 +263,25 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
             final Instant finish, final long ruleId, final String rate) {
         return ruleSetBuilder.with(RuleSetBuilder::rule, RuleBuilder.creator()
                 .with(RuleBuilder::input, Arrays.asList(exmethod, exchange, product, region, asset))
+                .with(RuleBuilder::start, start)
+                .with(RuleBuilder::end, finish)
+                .with(RuleBuilder::setId, new UUID(0L, ruleId))
+                .with(RuleBuilder::setCode, new UUID(0L, ruleId))
+                .with(RuleBuilder::output, Collections.singletonMap("Rate", rate)));
+    }
+
+    /**
+     * Helper method to add a Commission Rule to the Commission ruleset with a notional range.
+     */
+    public static Builder<RuleSetBuilder, DecisionTreeRuleSet> addRule(
+            final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder,
+            final String exmethod, final String exchange,
+            final String product, final String region,
+            final String asset, final String notionalRange,
+            final Instant start,
+            final Instant finish, final long ruleId, final String rate) {
+        return ruleSetBuilder.with(RuleSetBuilder::rule, RuleBuilder.creator()
+                .with(RuleBuilder::input, Arrays.asList(exmethod, exchange, product, region, asset, notionalRange))
                 .with(RuleBuilder::start, start)
                 .with(RuleBuilder::end, finish)
                 .with(RuleBuilder::setId, new UUID(0L, ruleId))

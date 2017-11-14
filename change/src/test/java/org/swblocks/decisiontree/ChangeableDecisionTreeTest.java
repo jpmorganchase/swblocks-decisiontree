@@ -47,7 +47,7 @@ public class ChangeableDecisionTreeTest {
 
         final Input input = decisionTree.createInputs("VOICE", "CME", "ED", "US", "RATE");
 
-        final Optional<OutputResults> results = decisionTree.getEvaluationFor(input);
+        final Optional<OutputResults> results = decisionTree.getSingleEvaluationFor(input);
         assertTrue(results.isPresent());
         assertEquals("1.4", results.get().results().get("Rate"));
     }

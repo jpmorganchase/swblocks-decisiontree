@@ -16,7 +16,10 @@
 
 package org.swblocks.decisiontree.tree;
 
+import java.time.Instant;
+
 import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
  * Driver holding a {@link DateRange}.
@@ -24,7 +27,7 @@ import org.swblocks.jbl.util.DateRange;
 public class DateRangeDriver extends InputDriver {
     public static final String DR_PREFIX = "DR";
 
-    public DateRangeDriver(String name, DateRange range) {
+    public DateRangeDriver(String name, Range<Instant> range) {
         super(name, InputValueType.DATE_RANGE, new DateRangeEvaluation(name, range));
     }
 }

@@ -92,7 +92,7 @@ public class ChangeFromBuilder {
 
         // Identical result from the other side of the value group
         final Input input = decisionTree.createInputs("DMA", "CBT", "ED", "US", "INDEX");
-        Optional<OutputResults> evaluationFor = decisionTree.getEvaluationFor(input);
+        Optional<OutputResults> evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
 
         final Builder<ChangeBuilder, Change> builder = decisionTree.createChange("USER1",
@@ -102,7 +102,7 @@ public class ChangeFromBuilder {
                 ValueGroupChangeBuilder.creator("CMEGroup")
                         .with(ValueGroupChangeBuilder::drivers, Arrays.asList("CME", "CBOT", "CBT")));
         decisionTree.applyChange(builder, "USER2");
-        evaluationFor = decisionTree.getEvaluationFor(input);
+        evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
     }
 

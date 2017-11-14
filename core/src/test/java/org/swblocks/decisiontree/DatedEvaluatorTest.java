@@ -26,14 +26,14 @@ import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.swblocks.decisiontree.tree.DecisionTreeType;
-import org.swblocks.decisiontree.tree.TreeNode;
-import org.swblocks.decisiontree.util.CommisionRuleSetSupplier;
-import org.swblocks.jbl.builders.Builder;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.decisiontree.domain.builders.RuleBuilder;
 import org.swblocks.decisiontree.domain.builders.RuleSetBuilder;
 import org.swblocks.decisiontree.tree.DecisionTreeFactory;
+import org.swblocks.decisiontree.tree.DecisionTreeType;
+import org.swblocks.decisiontree.tree.TreeNode;
+import org.swblocks.decisiontree.util.CommisionRuleSetSupplier;
+import org.swblocks.jbl.builders.Builder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -322,7 +322,7 @@ public class DatedEvaluatorTest {
 
         final List<String> inputs = Arrays.asList("CLM", "A102059551", "0152035", "0151488",
                 "ELEC", "NMEM", "FUTURE", "Y2", "381", "Equity indices", "IFLL", "ER");
-        final Optional<UUID> result = Evaluator.evaluate(inputs, now, node);
+        final Optional<UUID> result = Evaluator.singleEvaluate(inputs, now, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 1L), result.get());
     }
@@ -332,12 +332,12 @@ public class DatedEvaluatorTest {
     }
 
     private void checkNoMatch(final List<String> input, final Instant time, final TreeNode node) {
-        final Optional<UUID> result = Evaluator.evaluate(input, time, node);
+        final Optional<UUID> result = Evaluator.singleEvaluate(input, time, node);
         assertFalse(result.isPresent());
     }
 
     private void checkMatch(final List<String> input, final Instant time, final TreeNode node, final long id) {
-        final Optional<UUID> result = Evaluator.evaluate(input, time, node);
+        final Optional<UUID> result = Evaluator.singleEvaluate(input, time, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, id), result.get());
     }
