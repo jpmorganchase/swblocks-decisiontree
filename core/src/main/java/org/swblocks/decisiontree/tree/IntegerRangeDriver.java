@@ -24,7 +24,7 @@ import org.swblocks.jbl.util.Range;
 public class IntegerRangeDriver extends InputDriver {
     public static final String IR_PREFIX = "IR";
 
-    public IntegerRangeDriver(String name, Range<Integer> range) {
+    public IntegerRangeDriver(final String name, final Range<Integer> range) {
         super(name, InputValueType.INTEGER_RANGE, new IntegerRangeEvaluation(name, range));
     }
 }

@@ -62,7 +62,7 @@ public class DomainSerialiserTest {
 
     @Test
     public void convertStringToComplexRegExDriver() {
-        testStringConversionToInputDriver(InputBuilder.RegExInput("^[A-Z]{1,2}[A-Z][0-9]{1,2}$"),
+        testStringConversionToInputDriver(InputBuilder.regExInput("^[A-Z]{1,2}[A-Z][0-9]{1,2}$"),
                 "^[A-Z]{1,2}[A-Z][0-9]{1,2}$", InputValueType.REGEX);
     }
 
@@ -120,9 +120,9 @@ public class DomainSerialiserTest {
         assertThat(intRangeDriver.getType(), is(InputValueType.INTEGER_RANGE));
         assertThat(intRangeDriver.getValue(), is(testString));
         assertThat(intRangeDriver.evaluate("123"), is(true));
-        Integer maxInt = new Integer(Integer.MAX_VALUE);
+        final Integer maxInt = new Integer(Integer.MAX_VALUE);
         assertThat(intRangeDriver.evaluate(maxInt.toString()), is(false));
-        Integer almostMaxInt = new Integer(Integer.MAX_VALUE - 1);
+        final Integer almostMaxInt = new Integer(Integer.MAX_VALUE - 1);
         assertThat(intRangeDriver.evaluate(almostMaxInt.toString()), is(true));
     }
 
@@ -136,7 +136,7 @@ public class DomainSerialiserTest {
         assertThat(intRangeDriver.getType(), is(InputValueType.INTEGER_RANGE));
         assertThat(intRangeDriver.getValue(), is(testString));
         assertThat(intRangeDriver.evaluate("12"), is(true));
-        Integer minInt = new Integer(Integer.MIN_VALUE);
+        final Integer minInt = new Integer(Integer.MIN_VALUE);
         assertThat(intRangeDriver.evaluate(minInt.toString()), is(true));
     }
 
@@ -148,13 +148,13 @@ public class DomainSerialiserTest {
         final InputDriver intRangeDriver = rangeSupplier.get();
     }
 
-    private void testStringConversionToInputDriver(String inputString,
-                                                   InputValueType expectedType) {
+    private void testStringConversionToInputDriver(final String inputString,
+                                                   final InputValueType expectedType) {
         testStringConversionToInputDriver(inputString, inputString, expectedType);
     }
 
-    private void testStringConversionToInputDriver(String inputString, String resultsString,
-                                                   InputValueType expectedType) {
+    private void testStringConversionToInputDriver(final String inputString, final String resultsString,
+                                                   final InputValueType expectedType) {
         final DriverCache cache = new DriverCache();
         final Supplier<InputDriver> driverSupplier = DomainSerialiser.createInputDriver(inputString, cache);
         final InputDriver driver = driverSupplier.get();

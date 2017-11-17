@@ -35,32 +35,32 @@ public final class InputBuilder {
     }
 
     /**
-     * RegExInput generates a Regular Expression Input String from a basic regular expression.
+     * regExInput generates a Regular Expression Input String from a basic regular expression.
      *
-     * @param regExpression plain regular expression to be used as input.
+     * @param regex plain regular expression to be used as input.
      * @return input String prefixed by the {@code RegexDriver.REGEX_PREFIX}
      */
-    public static String RegExInput(String regExpression) {
-        return RegexDriver.REGEX_PREFIX + ":" + regExpression;
+    public static String regExInput(final String regex) {
+        return RegexDriver.REGEX_PREFIX + ":" + regex;
     }
 
     /**
-     * DateRangeInput generates a Date Range Input String from a {@link Range} of {@link Instant}.
+     * dateRangeInput generates a Date Range Input String from a {@link Range} of {@link Instant}.
      *
      * @param range {@link Range} of dates
      * @return input string for Date Ranges, prefixed by the {@code DateRangeDriver.DR_PREFIX}
      */
-    public static String DateRangeInput(Range<Instant> range) {
+    public static String dateRangeInput(final Range<Instant> range) {
         return DateRangeDriver.DR_PREFIX + ":" + range.getStart() + "|" + range.getFinish();
     }
 
     /**
-     * IntegerRangeInput generates an Integer Range Input Strin from a {@link Range} of {@link Integer}
+     * integerRangeInput generates an Integer Range Input Strin from a {@link Range} of {@link Integer}
      *
      * @param range {@link Range} of integers
      * @return input string for Integer Ranges, prefixed by the {@code IntegerRangeDriver.IR_PREFIX}
      */
-    public static String IntegerRangeInput(Range<Integer> range) {
+    public static String integerRangeInput(final Range<Integer> range) {
         return IntegerRangeDriver.IR_PREFIX + ":" + range.getStart() + "|" + range.getFinish();
     }
 }

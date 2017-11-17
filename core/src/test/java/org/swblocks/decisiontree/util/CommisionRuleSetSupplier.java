@@ -77,7 +77,7 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
         addRule(ruleSetBuilder, "VOICE", "CME", "NDK", "AP.?C", "INDEX", null, null, 6, "1.1");
         addRule(ruleSetBuilder, "*", "C.?E", "S&P", "US", "INDEX", null, null, 7, "1.7");
         addRule(ruleSetBuilder, "*", "CME",
-                InputBuilder.RegExInput("^[A-Z]{1,2}[A-Z][0-9]{1,2}$"),
+                InputBuilder.regExInput("^[A-Z]{1,2}[A-Z][0-9]{1,2}$"),
                 "US", "*", null, null, 8, "1.8");
 
         return ruleSetBuilder;
@@ -126,8 +126,6 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
      * Duplicates the getSlicedRuleSet test using a DATE_RANGE on a Single version tree over sliced trees.
      */
     public static Builder<RuleSetBuilder, DecisionTreeRuleSet> getCommissionRuleSetWithDateRanges() {
-        final UUID id = new UUID(0, 1);
-
         final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder = RuleSetBuilder.creator("commissions",
                 Arrays.asList("RANGE", "EXMETHOD", "EXCHANGE", "PRODUCT", "REGION", "ASSET"));
         addDateRangeRule(ruleSetBuilder, "2013-03-28T00:00:00Z", "2013-04-01T00:00:00Z",
@@ -192,15 +190,24 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
         final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder = RuleSetBuilder.creator("commissions",
                 Arrays.asList("EXMETHOD", "EXCHANGE", "PRODUCT", "REGION", "ASSET", "NOTIONAL"));
         ruleSetBuilder.with(RuleSetBuilder::groups, groups);
-        addRule(ruleSetBuilder, "*", GroupDriver.VG_PREFIX + id, "*", "*", "INDEX", "IR:1000|5000", null, null, 0, "1.11");
-        addRule(ruleSetBuilder, "*", GroupDriver.VG_PREFIX + id, "*", "*", "INDEX", "IR:5000|10000", null, null, 1, "1.12");
-        addRule(ruleSetBuilder, "*", "CME", "S&P", "*", "INDEX", "", null, null, 2, "1.2");
-        addRule(ruleSetBuilder, "VOICE", "CME", "ED", "*", "RATE", "", null, null, 3, "1.4");
-        addRule(ruleSetBuilder, "VOICE", "*", "*", "US", "*", "", null, null, 4, "1.5");
-        addRule(ruleSetBuilder, "*", "*", "*", "US", "*", "", null, null, 5, "1.2");
-        addRule(ruleSetBuilder, "*", "*", "*", "UK", "*", "", null, null, 6, "1.1");
-        addRule(ruleSetBuilder, "*", "*", "*", "UK", "*", "IR:1000|50000", null, null, 7, "1.17");
-        addRule(ruleSetBuilder, "*", "*", "*", "UK", "*", "IR:500|5000", null, null, 8, "1.18");
+        addRule(ruleSetBuilder, "*", GroupDriver.VG_PREFIX + id, "*", "*", "INDEX",
+                "IR:1000|5000", null, null, 0, "1.11");
+        addRule(ruleSetBuilder, "*", GroupDriver.VG_PREFIX + id, "*", "*", "INDEX",
+                "IR:5000|10000", null, null, 1, "1.12");
+        addRule(ruleSetBuilder, "*", "CME", "S&P", "*", "INDEX",
+                "", null, null, 2, "1.2");
+        addRule(ruleSetBuilder, "VOICE", "CME", "ED", "*", "RATE",
+                "", null, null, 3, "1.4");
+        addRule(ruleSetBuilder, "VOICE", "*", "*", "US", "*",
+                "", null, null, 4, "1.5");
+        addRule(ruleSetBuilder, "*", "*", "*", "US", "*",
+                "", null, null, 5, "1.2");
+        addRule(ruleSetBuilder, "*", "*", "*", "UK", "*",
+                "", null, null, 6, "1.1");
+        addRule(ruleSetBuilder, "*", "*", "*", "UK", "*",
+                "IR:1000|50000", null, null, 7, "1.17");
+        addRule(ruleSetBuilder, "*", "*", "*", "UK", "*",
+                "IR:500|5000", null, null, 8, "1.18");
         return ruleSetBuilder;
     }
 

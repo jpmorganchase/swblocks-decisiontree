@@ -38,7 +38,7 @@ public abstract class GenericRangeEvaluation<T extends Comparable<? super T>> im
             return true;
         }
         final T evalInstant = parse(inputString);
-        return Range.RANGE_CHECK.test(this.range, evalInstant);
+        return Range.RANGE_CHECK.test(range, evalInstant);
     }
 
     @Override
@@ -49,13 +49,13 @@ public abstract class GenericRangeEvaluation<T extends Comparable<? super T>> im
         if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        return this.name.equals(((GenericRangeEvaluation) other).name);
+        return name.equals(((GenericRangeEvaluation) other).name);
     }
 
     @Override
     public int hashCode() {
-        return this.name.hashCode();
+        return name.hashCode();
     }
 
-    protected abstract T parse(final String value);
+    protected abstract T parse(String value);
 }

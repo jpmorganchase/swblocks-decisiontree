@@ -26,12 +26,12 @@ import org.swblocks.jbl.util.Range;
  * Evaluation class for evaluating String inputs of {@link Instant} formatted to {@link DateTimeFormatter#ISO_INSTANT}.
  */
 public final class DateRangeEvaluation extends GenericRangeEvaluation<Instant> implements Predicate<String> {
-    DateRangeEvaluation(String name, Range<Instant> range) {
+    DateRangeEvaluation(final String name, final Range<Instant> range) {
         super(name, range);
     }
 
     @Override
-    protected Instant parse(String value) {
+    protected Instant parse(final String value) {
         return Instant.parse(value);
     }
 }

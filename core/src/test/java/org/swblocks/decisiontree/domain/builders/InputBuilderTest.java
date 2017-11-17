@@ -37,19 +37,19 @@ public class InputBuilderTest {
 
     @Test
     public void testRegExInput() {
-        assertThat(InputBuilder.RegExInput(".RegEx"), is("RE:.RegEx"));
+        assertThat(InputBuilder.regExInput(".RegEx"), is("RE:.RegEx"));
     }
 
     @Test
     public void testDateRangeInput() {
-        String startStr = "2013-03-28T00:00:00Z";
-        String endStr = "2015-06-01T10:50:00Z";
-        Range<Instant> range = new Range<>(Instant.parse(startStr), Instant.parse(endStr));
-        assertThat(InputBuilder.DateRangeInput(range), is("DR:" + startStr + "|" + endStr));
+        final String startStr = "2013-03-28T00:00:00Z";
+        final String endStr = "2015-06-01T10:50:00Z";
+        final Range<Instant> range = new Range<>(Instant.parse(startStr), Instant.parse(endStr));
+        assertThat(InputBuilder.dateRangeInput(range), is("DR:" + startStr + "|" + endStr));
     }
 
     @Test
     public void testIntegerRangeInput() {
-        assertThat(InputBuilder.IntegerRangeInput(new Range<Integer>(100, 500)), is("IR:100|500"));
+        assertThat(InputBuilder.integerRangeInput(new Range<>(100, 500)), is("IR:100|500"));
     }
 }

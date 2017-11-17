@@ -37,9 +37,9 @@ public final class Evaluator {
 
     /**
      * Evaluates the dated decision tree using the supplied time.  Only one result is returned, if multiple nodes
-     * with the same weigth, then only the first node is returned.
+     * with the same weight, then only the first node is returned.
      *
-     * <p>When the decision tree is for a single decision tree, then the date is ignored. For dated decision tress the
+     * <p>When the decision tree is for a single decision tree, then the date is ignored. For dated decision trees the
      * time is used in the construction of the decision tree.
      *
      * @param searchInputs List of String inputs to search the decision tree for.  The size of the list must match the
@@ -63,7 +63,7 @@ public final class Evaluator {
      * Evaluates the dated decision tree using the supplied time.  All matching nodes with the highest weighting are
      * returned.
      *
-     * <p>When the decision tree is for a single decision tree, then the date is ignored. For dated decision tress the
+     * <p>When the decision tree is for a single decision tree, then the date is ignored. For dated decision trees the
      * time is used in the construction of the decision tree.
      *
      * @param searchInputs List of String inputs to search the decision tree for.  The size of the list must match the

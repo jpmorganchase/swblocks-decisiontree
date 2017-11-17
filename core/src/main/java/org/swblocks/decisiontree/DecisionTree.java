@@ -46,7 +46,7 @@ public class DecisionTree {
                            final DecisionTreeRuleSet decisionTreeRuleSet) {
         this.loader = loader;
         this.type = type;
-        this.ruleSet = decisionTreeRuleSet;
+        ruleSet = decisionTreeRuleSet;
         initialiseRootNode();
     }
 
@@ -72,7 +72,7 @@ public class DecisionTree {
      * @return {@link Input}
      */
     public Input createInputs() {
-        return Input.create(this.ruleSet.getName(), this.ruleSet.getWeightedDrivers());
+        return Input.create(ruleSet.getName(), ruleSet.getWeightedDrivers());
     }
 
     /**
@@ -82,7 +82,7 @@ public class DecisionTree {
      * @return {@link Input}
      */
     public Input createInputs(final String... searchValues) {
-        return Input.create(this.ruleSet.getName(), this.ruleSet.getWeightedDrivers(), searchValues);
+        return Input.create(ruleSet.getName(), ruleSet.getWeightedDrivers(), searchValues);
     }
 
     /**
@@ -97,7 +97,7 @@ public class DecisionTree {
             return createInputs(searchValues);
         }
 
-        return Input.create(this.ruleSet.getName(), this.ruleSet.getWeightedDrivers(), evaluationDate, searchValues);
+        return Input.create(ruleSet.getName(), ruleSet.getWeightedDrivers(), evaluationDate, searchValues);
     }
 
     /**
@@ -111,11 +111,11 @@ public class DecisionTree {
      * @return {@link Optional} Output holder for the results.
      */
     public Optional<OutputResults> getSingleEvaluationFor(final Input input) {
-        final TreeNode rootNodeToTree = this.node;
+        final TreeNode rootNodeToTree = node;
         final Optional<UUID> result = Evaluator.singleEvaluate(input.getEvaluationInputs(), input.getEvaluationDate(),
                 rootNodeToTree);
         if (result.isPresent()) {
-            return Optional.of(new OutputResults(this.ruleSet.getRules().get(result.get())));
+            return Optional.of(new OutputResults(ruleSet.getRules().get(result.get())));
         }
         return Optional.empty();
     }
@@ -146,15 +146,14 @@ public class DecisionTree {
      * @return {@link List} of highest weighted results.
      */
     public List<OutputResults> getEvaluationsFor(final Input input) {
-        final TreeNode rootNodeToTree = this.node;
         final List<UUID> result = Evaluator.evaluate(input.getEvaluationInputs(), input.getEvaluationDate(),
-                rootNodeToTree);
+                node);
 
         return result.stream().map(uuid ->
-                new OutputResults(this.ruleSet.getRules().get(uuid))).collect(Collectors.toList());
+                new OutputResults(ruleSet.getRules().get(uuid))).collect(Collectors.toList());
     }
 
     protected void initialiseRootNode() {
-        this.node = DecisionTreeFactory.constructDecisionTree(this.ruleSet, this.type);
+        node = DecisionTreeFactory.constructDecisionTree(ruleSet, type);
     }
 }

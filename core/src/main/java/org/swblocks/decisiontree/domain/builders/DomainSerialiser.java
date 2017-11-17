@@ -162,13 +162,13 @@ public final class DomainSerialiser {
                     EhSupport.ensure(intTokenizer.countTokens() == 2 || intTokenizer.countTokens() == 3,
                             "Integer Range driver incorrectly formatted");
                     if (intTokenizer.countTokens() == 3) {
-                        String minValue = intTokenizer.nextToken();
+                        final String minValue = intTokenizer.nextToken();
                         intTokenizer.nextToken();
-                        String maxValue = intTokenizer.nextToken();
+                        final String maxValue = intTokenizer.nextToken();
                         inputDriver = new IntegerRangeDriver(currentDriver, new Range<>(Integer.parseInt(minValue),
                                 Integer.parseInt(maxValue)));
                     } else {
-                        String firstToken = intTokenizer.nextToken();
+                        final String firstToken = intTokenizer.nextToken();
                         if ("|".equals(firstToken)) {
                             inputDriver = new IntegerRangeDriver(currentDriver, new Range<>(MIN_INTEGER,
                                     Integer.parseInt(intTokenizer.nextToken())));

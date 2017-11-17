@@ -47,7 +47,7 @@ import static org.junit.Assert.assertThat;
  * Example for the Decision Tree which generates a DecisionTree from the {@link Builder}. The example uses overlapping
  * inputs to generate multiple results for a set of inputs.
  *
- * The {@link Builder} is a programmic way for creating complex structures via a simple API.
+ * <p>The {@link Builder} is a programmic way for creating complex structures via a simple API.
  */
 public class MultipleEvaluationsFromBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(MultipleEvaluationsFromBuilder.class);
@@ -102,12 +102,12 @@ public class MultipleEvaluationsFromBuilder {
         /**
          * Create a decision tree which is not time aware {@link DecisionTreeType#SINGLE}.
          */
-        DecisionTree decisionTree = DecisionTree.instanceOf(BuilderLoader.instanceOf(builder),
+        final DecisionTree decisionTree = DecisionTree.instanceOf(BuilderLoader.instanceOf(builder),
                 DecisionTreeType.SINGLE);
 
         // Matches rule inputs [ "*", "VG:CMEGroup", "*", "*", "INDEX", "*" ]
         Input input = decisionTree.createInputs("VOICE", "CBOT", "S&P", "US", "INDEX", "100");
-        Optional<OutputResults> evaluationFor = decisionTree.getSingleEvaluationFor(input);
+        final Optional<OutputResults> evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
         assertThat(evaluationFor.isPresent(), is(true));
         assertThat(evaluationFor.get().results().get("Rate"), is("1.19"));
@@ -122,7 +122,6 @@ public class MultipleEvaluationsFromBuilder {
                 outputResults -> outputResults.results().get("Rate")).collect(Collectors.toList()),
                 IsCollectionContaining.hasItems("1.17"));
 
-
         // Matches rule inputs [ "*", "VG:CMEGroup", "*", "*", "INDEX", "5000|10000" ]
         // AND Matches rule inputs [ "*", "VG:CMEGroup", "*", "*", "INDEX", "5000|7000" ]
         input = decisionTree.createInputs("VOICE", "CBOT", "S&P", "US", "INDEX", "6100");
@@ -135,7 +134,7 @@ public class MultipleEvaluationsFromBuilder {
                 IsCollectionContaining.hasItems("1.13", "1.15"));
     }
 
-    private void logResult(Input input, Optional<OutputResults> evaluationFor) {
+    private void logResult(final Input input, final Optional<OutputResults> evaluationFor) {
         if (evaluationFor.isPresent()) {
             LOGGER.info("Found evaluation for {} in tree, the result is {}", input, evaluationFor.get().results());
         } else {
@@ -143,7 +142,7 @@ public class MultipleEvaluationsFromBuilder {
         }
     }
 
-    private void logResult(Input input, List<OutputResults> evaluationsFor) {
+    private void logResult(final Input input, final List<OutputResults> evaluationsFor) {
         if (CollectionUtils.isNotEmpty(evaluationsFor)) {
             evaluationsFor.forEach(output -> LOGGER.info("Found evaluation for {} in tree, the result is {}",
                     input, output.results()));
