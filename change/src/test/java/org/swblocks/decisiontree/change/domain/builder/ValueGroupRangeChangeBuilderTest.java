@@ -48,9 +48,7 @@ import static org.junit.Assert.assertThat;
 public class ValueGroupRangeChangeBuilderTest {
     private static final Instant NOW = Instant.now();
 
-    private Set<ValueGroup> valueGroups;
     private Builder<ValueGroupChangeBuilder, List<ValueGroupChange>> builder;
-    private DecisionTreeRuleSet ruleSet;
 
     @Before
     public void setup() {
@@ -59,39 +57,40 @@ public class ValueGroupRangeChangeBuilderTest {
         final Instant end = NOW.plus(Period.ofWeeks(5));
         final DateRange range = new DateRange(start, end);
         final List<String> drivers = Arrays.asList("Test1", "Test2", "Test3");
-        this.valueGroups = Collections.singleton(new ValueGroup(id, "TestValueGroup", drivers, range));
+        final Set<ValueGroup> valueGroups = Collections.singleton(
+                new ValueGroup(id, "TestValueGroup", drivers, range));
 
-        this.ruleSet = new DecisionTreeRuleSet("TestRuleSet", Collections.emptyMap(), Collections.emptyList(),
-                new DriverCache(), this.valueGroups);
+        final DecisionTreeRuleSet ruleSet = new DecisionTreeRuleSet("TestRuleSet", Collections.emptyMap(), Collections.emptyList(),
+                new DriverCache(), valueGroups);
 
-        this.builder = ValueGroupChangeBuilder.creator("TestValueGroup");
-        this.builder.with(ValueGroupChangeBuilder::ruleSet, this.ruleSet);
-        this.builder.with(ValueGroupChangeBuilder::id, new UUID(0, 1));
+        builder = ValueGroupChangeBuilder.creator("TestValueGroup");
+        builder.with(ValueGroupChangeBuilder::ruleSet, ruleSet);
+        builder.with(ValueGroupChangeBuilder::id, new UUID(0, 1));
     }
 
     @Test(expected = IllegalStateException.class)
     public void noGroupsToAmend() {
-        this.builder.build();
+        builder.build();
     }
 
     @Test(expected = IllegalStateException.class)
     public void noDateRangeSupplied() {
-        this.builder.build();
+        builder.build();
     }
 
     @Test(expected = IllegalStateException.class)
     public void unknownId() {
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(
                 NOW.plus(Period.ofWeeks(1)), NOW.plus(Period.ofWeeks(9))));
-        this.builder.with(ValueGroupChangeBuilder::id, new UUID(0, 5));
-        this.builder.build();
+        builder.with(ValueGroupChangeBuilder::id, new UUID(0, 5));
+        builder.build();
     }
 
     @Test
     public void deactivatesValueGroup() {
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(null, null));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(null, null));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(1));
 
         assertValueGroupChange(changes.get(0), Type.ORIGINAL, new UUID(0, 1), "TestValueGroup",
@@ -100,9 +99,9 @@ public class ValueGroupRangeChangeBuilderTest {
 
     @Test
     public void amendsStartDateOfValueGroup() {
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, null));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, null));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(2));
 
         final List<ValueGroupChange> originals = getChangesByType(changes, Type.ORIGINAL);
@@ -120,9 +119,9 @@ public class ValueGroupRangeChangeBuilderTest {
 
     @Test
     public void amendsEndDateOfValueGroup() {
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(null, NOW.plus(Period.ofWeeks(4))));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(null, NOW.plus(Period.ofWeeks(4))));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(2));
 
         final List<ValueGroupChange> originals = getChangesByType(changes, Type.ORIGINAL);
@@ -140,10 +139,10 @@ public class ValueGroupRangeChangeBuilderTest {
 
     @Test
     public void amendsStartAndEndDateOfValueGroup() {
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW.plus(Period.ofWeeks(2)),
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW.plus(Period.ofWeeks(2)),
                 NOW.plus(Period.ofWeeks(4))));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(2));
 
         final List<ValueGroupChange> originals = getChangesByType(changes, Type.ORIGINAL);
@@ -161,11 +160,11 @@ public class ValueGroupRangeChangeBuilderTest {
 
     @Test
     public void amendsStartAndEndDateOfValueGroupAndDrivers() {
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW.plus(Period.ofWeeks(2)),
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW.plus(Period.ofWeeks(2)),
                 NOW.plus(Period.ofWeeks(4))));
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(2));
 
         final List<ValueGroupChange> originals = getChangesByType(changes, Type.ORIGINAL);
@@ -183,10 +182,10 @@ public class ValueGroupRangeChangeBuilderTest {
 
     @Test(expected = IllegalStateException.class)
     public void triesToAmendStartAndEndDateOfValueGroupDatesNotInChronologicalOrder() {
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW.plus(Period.ofWeeks(4)),
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW.plus(Period.ofWeeks(4)),
                 NOW.plus(Period.ofWeeks(2))));
 
-        this.builder.build();
+        builder.build();
     }
 
     private List<ValueGroupChange> getChangesByType(final List<ValueGroupChange> changes, final Type type) {

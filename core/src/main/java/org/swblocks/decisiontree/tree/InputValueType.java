@@ -33,7 +33,7 @@ import org.swblocks.jbl.util.DateRange;
  *
  */
 public enum InputValueType {
-    STRING, REGEX, VALUE_GROUP, DATE_RANGE;
+    STRING, REGEX, VALUE_GROUP, DATE_RANGE, INTEGER_RANGE;
 
     public static final String WILDCARD = "*";
 }

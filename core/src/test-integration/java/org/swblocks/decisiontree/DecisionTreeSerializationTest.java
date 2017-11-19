@@ -44,7 +44,7 @@ public class DecisionTreeSerializationTest {
     public void decisionTree() {
         final DecisionTree decisionTree = DecisionTree.instanceOf(new CommisionRuleSetSupplier(),
                 DecisionTreeType.SINGLE);
-        decisionTree.getEvaluationFor(decisionTree.createInputs());
+        decisionTree.getSingleEvaluationFor(decisionTree.createInputs());
 
         final Kryo kryo = new Kryo();
         kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
@@ -69,7 +69,7 @@ public class DecisionTreeSerializationTest {
 
         final org.swblocks.decisiontree.Input input = decisionTree.createInputs("VOICE", "CME", "ED", "US", "RATE");
 
-        final Optional<OutputResults> results = tree.getEvaluationFor(input);
+        final Optional<OutputResults> results = tree.getSingleEvaluationFor(input);
         assertTrue(results.isPresent());
         Assert.assertEquals("1.4", results.get().results().get("Rate"));
     }

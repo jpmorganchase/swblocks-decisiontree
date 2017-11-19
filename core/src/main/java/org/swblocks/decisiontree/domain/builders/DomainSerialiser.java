@@ -33,10 +33,11 @@ import org.swblocks.decisiontree.tree.DateRangeDriver;
 import org.swblocks.decisiontree.tree.GroupDriver;
 import org.swblocks.decisiontree.tree.InputDriver;
 import org.swblocks.decisiontree.tree.InputValueType;
+import org.swblocks.decisiontree.tree.IntegerRangeDriver;
 import org.swblocks.decisiontree.tree.RegexDriver;
 import org.swblocks.decisiontree.tree.StringDriver;
 import org.swblocks.jbl.eh.EhSupport;
-import org.swblocks.jbl.util.DateRange;
+import org.swblocks.jbl.util.Range;
 
 /**
  * Utility methods to convert the DecisionTree domain objects to and from their string format.
@@ -49,12 +50,16 @@ public final class DomainSerialiser {
             return InputValueType.VALUE_GROUP;
         } else if (driverValue.startsWith(DateRangeDriver.DR_PREFIX)) {
             return InputValueType.DATE_RANGE;
+        } else if (driverValue.startsWith(IntegerRangeDriver.IR_PREFIX)) {
+            return InputValueType.INTEGER_RANGE;
         } else if (driverValue.startsWith(RegexDriver.REGEX_PREFIX) ||
                 driverValue.contains(".?") || driverValue.contains(".*")) {
             return InputValueType.REGEX;
         }
         return InputValueType.STRING;
     };
+    private static final Integer MIN_INTEGER = new Integer(Integer.MIN_VALUE);
+    private static final Integer MAX_INTEGER = new Integer(Integer.MAX_VALUE);
 
     /**
      * Private constructor to enforce static use.
@@ -148,8 +153,30 @@ public final class DomainSerialiser {
                     final StringTokenizer tokenizer = new StringTokenizer(
                             currentDriver.replace(DateRangeDriver.DR_PREFIX + ":",""), "|", false);
                     EhSupport.ensure(tokenizer.countTokens() == 2, "DateRange driver incorrectly formatted");
-                    inputDriver = new DateRangeDriver(currentDriver, new DateRange(Instant.parse(tokenizer.nextToken()),
+                    inputDriver = new DateRangeDriver(currentDriver, new Range<>(Instant.parse(tokenizer.nextToken()),
                             Instant.parse(tokenizer.nextToken())));
+                    break;
+                case INTEGER_RANGE:
+                    final StringTokenizer intTokenizer = new StringTokenizer(
+                            currentDriver.replace(IntegerRangeDriver.IR_PREFIX + ":", ""), "|", true);
+                    EhSupport.ensure(intTokenizer.countTokens() == 2 || intTokenizer.countTokens() == 3,
+                            "Integer Range driver incorrectly formatted");
+                    if (intTokenizer.countTokens() == 3) {
+                        final String minValue = intTokenizer.nextToken();
+                        intTokenizer.nextToken();
+                        final String maxValue = intTokenizer.nextToken();
+                        inputDriver = new IntegerRangeDriver(currentDriver, new Range<>(Integer.parseInt(minValue),
+                                Integer.parseInt(maxValue)));
+                    } else {
+                        final String firstToken = intTokenizer.nextToken();
+                        if ("|".equals(firstToken)) {
+                            inputDriver = new IntegerRangeDriver(currentDriver, new Range<>(MIN_INTEGER,
+                                    Integer.parseInt(intTokenizer.nextToken())));
+                        } else {
+                            inputDriver = new IntegerRangeDriver(currentDriver, new Range<>(Integer.parseInt(firstToken),
+                                    MAX_INTEGER));
+                        }
+                    }
                     break;
                 default:
                     inputDriver = null;

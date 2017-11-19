@@ -41,17 +41,17 @@ public class EvaluationFromJsonFile {
 
         // Matches rule inputs [ "VOICE", "CME", "ED", "*", "RATE" ]
         Input input = decisionTree.createInputs("VOICE", "CME", "ED", "US", "RATE");
-        Optional<OutputResults> evaluationFor = decisionTree.getEvaluationFor(input);
+        Optional<OutputResults> evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
 
         // Matches rule inputs [ "*", "*", "*", "US", "*" ]
         input = decisionTree.createInputs("DMA", "TSE", "NK", "JP", "INDEX");
-        evaluationFor = decisionTree.getEvaluationFor(input);
+        evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
 
         // No match
         input = decisionTree.createInputs("DMA", "TSE", "NK", "JP", "INDEX");
-        evaluationFor = decisionTree.getEvaluationFor(input);
+        evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
     }
 

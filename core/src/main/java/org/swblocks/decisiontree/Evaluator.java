@@ -18,6 +18,7 @@ package org.swblocks.decisiontree;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,32 +36,64 @@ public final class Evaluator {
     }
 
     /**
-     * Evaluates the dated decision tree using the supplied time.
+     * Evaluates the dated decision tree using the supplied time.  Only one result is returned, if multiple nodes
+     * with the same weight, then only the first node is returned.
      *
-     * <p>When the decision tree is for a single decision tree, then the date is ignored. For dated decision tress the
+     * <p>When the decision tree is for a single decision tree, then the date is ignored. For dated decision trees the
      * time is used in the construction of the decision tree.
      *
      * @param searchInputs List of String inputs to search the decision tree for.  The size of the list must match the
      *                     number of drivers in the ruleset the decision tree is based on.
      * @param time         The point in time at which the evaluation is taking place
      * @param rootNode     The starting node of the search
-     * @return the Output unique Id of the rule found or {@code Optional.empty} is not match
+     * @return the Output unique Id of the rule found or {@code Optional.empty} if no match
      */
-    public static Optional<UUID> evaluate(final List<String> searchInputs, final Instant time,
-                                          final TreeNode rootNode) {
-        final List<EvaluationResult> results = evaluateAllResults(searchInputs, time, rootNode);
+    public static Optional<UUID> singleEvaluate(final List<String> searchInputs, final Instant time,
+                                                final TreeNode rootNode) {
+        final List<UUID> results = evaluate(searchInputs, time, rootNode);
 
         if (results.isEmpty()) {
             return Optional.empty();
         }
 
+        return Optional.of(results.get(0));
+    }
+
+    /**
+     * Evaluates the dated decision tree using the supplied time.  All matching nodes with the highest weighting are
+     * returned.
+     *
+     * <p>When the decision tree is for a single decision tree, then the date is ignored. For dated decision trees the
+     * time is used in the construction of the decision tree.
+     *
+     * @param searchInputs List of String inputs to search the decision tree for.  The size of the list must match the
+     *                     number of drivers in the ruleset the decision tree is based on.
+     * @param time         The point in time at which the evaluation is taking place
+     * @param rootNode     The starting node of the search
+     * @return List of highest weighted matching unique id's or {@code Collections.emptyList} if no match
+     */
+    public static List<UUID> evaluate(final List<String> searchInputs, final Instant time,
+                                      final TreeNode rootNode) {
+        final List<EvaluationResult> results = evaluateAllResults(searchInputs, time, rootNode);
+
+        if (results.isEmpty()) {
+            return Collections.emptyList();
+        } else if (results.size() == 1) {
+            return Collections.singletonList(results.get(0).getRuleIdentifier());
+        }
+
+        final List<UUID> bestResults = new ArrayList<>(results.size());
         EvaluationResult bestNode = results.get(0);
         for (final EvaluationResult result : results) {
             if (result.getWeight() > bestNode.getWeight()) {
+                bestResults.clear();
                 bestNode = result;
+                bestResults.add(result.getRuleIdentifier());
+            } else if (result.getWeight() == bestNode.getWeight()) {
+                bestResults.add(result.getRuleIdentifier());
             }
         }
-        return Optional.of(bestNode.getRuleIdentifier());
+        return bestResults;
     }
 
     /**

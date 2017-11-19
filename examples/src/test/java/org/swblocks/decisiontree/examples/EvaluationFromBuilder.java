@@ -85,28 +85,28 @@ public class EvaluationFromBuilder {
 
         // Matches rule inputs [ "VOICE", "CME", "ED", "*", "RATE" ]
         Input input = decisionTree.createInputs("VOICE", "CME", "ED", "US", "RATE");
-        Optional<OutputResults> evaluationFor = decisionTree.getEvaluationFor(input);
+        Optional<OutputResults> evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
 
         // Matches rule inputs [ "*", "VG:CMEGroup", "*", "*", "INDEX" ]
         // This matches the Value group which contains CME and CBOT
         input = decisionTree.createInputs("DMA", "CME", "ED", "US", "INDEX");
-        evaluationFor = decisionTree.getEvaluationFor(input);
+        evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
 
         // Identical result from the other side of the value group
         input = decisionTree.createInputs("DMA", "CBOT", "ED", "US", "INDEX");
-        evaluationFor = decisionTree.getEvaluationFor(input);
+        evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
 
         // Matches rule inputs [ "*", "*", "*", "UK", "*" ] with two outputs
         input = decisionTree.createInputs("DMA", "LSE", "I", "UK", "INDEX");
-        evaluationFor = decisionTree.getEvaluationFor(input);
+        evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
 
         // No match
         input = decisionTree.createInputs("DMA", "TSE", "NK", "JP", "INDEX");
-        evaluationFor = decisionTree.getEvaluationFor(input);
+        evaluationFor = decisionTree.getSingleEvaluationFor(input);
         logResult(input, evaluationFor);
     }
 

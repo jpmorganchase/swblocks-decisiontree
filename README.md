@@ -41,6 +41,13 @@ If the order of the columns are changed to make the Boss's mood higher importanc
 <br>Output: Leave Time: 10pm, After Work: More work
 </code><p>
 <p>
+### Data Types
+The Decision Tree supports a number of different types of definitions of data
+* Strings, the normal type inputs provide an exact match against the input.
+* Regular Expressions, standard regular expressions match against the input.
+* Groups, combinations of other all data types, including other groups matching any against the input.
+* Integer Ranges, matches any integer input within the range, inclusive at the minimum and exclusive at the maximum.
+* Date Ranges, matches any date within the range.
 
 ### Structure of code
 The code is in a multi-module structure project structure.
@@ -71,7 +78,7 @@ See the [LICENSE](LICENSE) file for additional license information
 
 The project is built with [Gradle](http://gradle.org/) using this [build.gradle](build.gradle) file.
 
-You require the following to build swblocks-jbl:
+You require the following to build swblocks-decisiontree:
 
 * Latest stable [Oracle JDK 8](http://www.oracle.com/technetwork/java/)
 

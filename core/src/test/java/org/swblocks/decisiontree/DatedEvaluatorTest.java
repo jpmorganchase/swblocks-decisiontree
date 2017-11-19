@@ -26,14 +26,14 @@ import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.swblocks.decisiontree.tree.DecisionTreeType;
-import org.swblocks.decisiontree.tree.TreeNode;
-import org.swblocks.decisiontree.util.CommisionRuleSetSupplier;
-import org.swblocks.jbl.builders.Builder;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.decisiontree.domain.builders.RuleBuilder;
 import org.swblocks.decisiontree.domain.builders.RuleSetBuilder;
 import org.swblocks.decisiontree.tree.DecisionTreeFactory;
+import org.swblocks.decisiontree.tree.DecisionTreeType;
+import org.swblocks.decisiontree.tree.TreeNode;
+import org.swblocks.decisiontree.util.CommisionRuleSetSupplier;
+import org.swblocks.jbl.builders.Builder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -52,12 +52,12 @@ public class DatedEvaluatorTest {
 
     @Before
     public void setUp() {
-        this.inputA = Arrays.asList("VOICE", "CME", "ED", "US", "RATE");
-        this.inputB = Arrays.asList("VOICE", "CME", "EB", "US", "RATE");
-        this.inputC = Arrays.asList("VOICE", "CME", "S&P", "US", "INDEX");
-        this.inputD = Arrays.asList("ELECTRONIC", "LIFFE", "L", "UK", "INDEX");
-        this.inputE = Arrays.asList("ELECTRONIC", "CME", "EB", "US", "RATE");
-        this.inputF = Arrays.asList("VOICE", "LIFFE", "L", "UK", "INDEX");
+        inputA = Arrays.asList("VOICE", "CME", "ED", "US", "RATE");
+        inputB = Arrays.asList("VOICE", "CME", "EB", "US", "RATE");
+        inputC = Arrays.asList("VOICE", "CME", "S&P", "US", "INDEX");
+        inputD = Arrays.asList("ELECTRONIC", "LIFFE", "L", "UK", "INDEX");
+        inputE = Arrays.asList("ELECTRONIC", "CME", "EB", "US", "RATE");
+        inputF = Arrays.asList("VOICE", "LIFFE", "L", "UK", "INDEX");
     }
 
     @Test
@@ -72,18 +72,18 @@ public class DatedEvaluatorTest {
         final TreeNode node = constructTree(ruleSet);
         Assert.assertNotNull(node);
 
-        checkMatch(this.inputC, now, node, 1L);
+        checkMatch(inputC, now, node, 1L);
 
-        checkNoMatch(this.inputC, now.plus(Period.ofWeeks(8)), node);
-        checkNoMatch(this.inputC, now.minus(Period.ofWeeks(8)), node);
+        checkNoMatch(inputC, now.plus(Period.ofWeeks(8)), node);
+        checkNoMatch(inputC, now.minus(Period.ofWeeks(8)), node);
 
-        checkMatch(this.inputC, now.plus(Period.ofDays(2)), node, 1L);
+        checkMatch(inputC, now.plus(Period.ofDays(2)), node, 1L);
 
-        checkNoMatch(this.inputA, now, node);
-        checkNoMatch(this.inputB, now, node);
-        checkNoMatch(this.inputD, now, node);
-        checkNoMatch(this.inputE, now, node);
-        checkNoMatch(this.inputF, now, node);
+        checkNoMatch(inputA, now, node);
+        checkNoMatch(inputB, now, node);
+        checkNoMatch(inputD, now, node);
+        checkNoMatch(inputE, now, node);
+        checkNoMatch(inputF, now, node);
     }
 
     @Test
@@ -100,9 +100,9 @@ public class DatedEvaluatorTest {
         Assert.assertNotNull(node);
 
         // Rule 1 and Rule 2 match - Rule 2 has higher weight
-        checkMatch(this.inputC, now, node, 2L);
+        checkMatch(inputC, now, node, 2L);
         // check that 2 come back
-        final List<EvaluationResult> result = Evaluator.evaluateAllResults(this.inputC, now, node);
+        final List<EvaluationResult> result = Evaluator.evaluateAllResults(inputC, now, node);
         assertEquals(2, result.size());
 
         final EvaluationResult ruleOneResult;
@@ -121,15 +121,15 @@ public class DatedEvaluatorTest {
         assertEquals(new UUID(0, 2), ruleTwoResult.getRuleIdentifier());
         assertEquals(13, ruleTwoResult.getWeight());
 
-        checkMatch(this.inputC, now.minus(Period.ofWeeks(8)), node, 1L);
-        checkMatch(this.inputC, now.plus(Period.ofWeeks(8)), node, 1L);
-        checkMatch(this.inputC, now.plus(Period.ofDays(2)), node, 2L);
+        checkMatch(inputC, now.minus(Period.ofWeeks(8)), node, 1L);
+        checkMatch(inputC, now.plus(Period.ofWeeks(8)), node, 1L);
+        checkMatch(inputC, now.plus(Period.ofDays(2)), node, 2L);
 
-        checkNoMatch(this.inputA, now, node);
-        checkNoMatch(this.inputB, now, node);
-        checkNoMatch(this.inputD, now, node);
-        checkNoMatch(this.inputE, now, node);
-        checkNoMatch(this.inputF, now, node);
+        checkNoMatch(inputA, now, node);
+        checkNoMatch(inputB, now, node);
+        checkNoMatch(inputD, now, node);
+        checkNoMatch(inputE, now, node);
+        checkNoMatch(inputF, now, node);
     }
 
     @Test
@@ -146,7 +146,7 @@ public class DatedEvaluatorTest {
         Assert.assertNotNull(node);
 
         // check that 2 come back and that they have the same weight as identical
-        final List<EvaluationResult> result = Evaluator.evaluateAllResults(this.inputC, now, node);
+        final List<EvaluationResult> result = Evaluator.evaluateAllResults(inputC, now, node);
         assertEquals(2, result.size());
         assertEquals(new UUID(0, 1), result.get(0).getRuleIdentifier());
         assertEquals(13, result.get(0).getWeight());
@@ -167,14 +167,14 @@ public class DatedEvaluatorTest {
         final TreeNode node = constructTree(ruleSet);
         Assert.assertNotNull(node);
 
-        checkMatch(this.inputC, now, node, 1L);
-        checkMatch(this.inputC, now.plus(Period.ofWeeks(8)), node, 2L);
+        checkMatch(inputC, now, node, 1L);
+        checkMatch(inputC, now.plus(Period.ofWeeks(8)), node, 2L);
 
-        checkNoMatch(this.inputA, now, node);
-        checkNoMatch(this.inputB, now, node);
-        checkNoMatch(this.inputD, now, node);
-        checkNoMatch(this.inputE, now, node);
-        checkNoMatch(this.inputF, now, node);
+        checkNoMatch(inputA, now, node);
+        checkNoMatch(inputB, now, node);
+        checkNoMatch(inputD, now, node);
+        checkNoMatch(inputE, now, node);
+        checkNoMatch(inputF, now, node);
     }
 
     @Test
@@ -191,13 +191,13 @@ public class DatedEvaluatorTest {
         final TreeNode node = constructTree(ruleSet);
         Assert.assertNotNull(node);
 
-        checkMatch(this.inputA, now, node, 3L);
-        checkMatch(this.inputC, now, node, 2L);
+        checkMatch(inputA, now, node, 3L);
+        checkMatch(inputC, now, node, 2L);
 
-        checkNoMatch(this.inputB, now, node);
-        checkNoMatch(this.inputD, now, node);
-        checkNoMatch(this.inputE, now, node);
-        checkNoMatch(this.inputF, now, node);
+        checkNoMatch(inputB, now, node);
+        checkNoMatch(inputD, now, node);
+        checkNoMatch(inputE, now, node);
+        checkNoMatch(inputF, now, node);
     }
 
     @Test
@@ -216,13 +216,13 @@ public class DatedEvaluatorTest {
         final TreeNode node = constructTree(ruleSet);
         Assert.assertNotNull(node);
 
-        checkMatch(this.inputA, now, node, 3L);
-        checkMatch(this.inputB, now, node, 4L);
-        checkMatch(this.inputC, now, node, 4L);
+        checkMatch(inputA, now, node, 3L);
+        checkMatch(inputB, now, node, 4L);
+        checkMatch(inputC, now, node, 4L);
 
-        checkNoMatch(this.inputD, now, node);
-        checkNoMatch(this.inputE, now, node);
-        checkNoMatch(this.inputF, now, node);
+        checkNoMatch(inputD, now, node);
+        checkNoMatch(inputE, now, node);
+        checkNoMatch(inputF, now, node);
     }
 
     @Test
@@ -242,13 +242,13 @@ public class DatedEvaluatorTest {
         final TreeNode node = constructTree(ruleSet);
         Assert.assertNotNull(node);
 
-        checkMatch(this.inputA, now, node, 3L);
-        checkMatch(this.inputB, now, node, 4L);
-        checkMatch(this.inputC, now, node, 4L);
-        checkMatch(this.inputE, now, node, 5L);
+        checkMatch(inputA, now, node, 3L);
+        checkMatch(inputB, now, node, 4L);
+        checkMatch(inputC, now, node, 4L);
+        checkMatch(inputE, now, node, 5L);
 
-        checkNoMatch(this.inputD, now, node);
-        checkNoMatch(this.inputF, now, node);
+        checkNoMatch(inputD, now, node);
+        checkNoMatch(inputF, now, node);
     }
 
     @Test
@@ -268,12 +268,12 @@ public class DatedEvaluatorTest {
         final TreeNode node = constructTree(ruleSet);
         Assert.assertNotNull(node);
 
-        checkMatch(this.inputA, now, node, 3L);
-        checkMatch(this.inputB, now, node, 4L);
-        checkMatch(this.inputC, now, node, 4L);
-        checkMatch(this.inputD, now, node, 6L);
-        checkMatch(this.inputE, now, node, 5L);
-        checkMatch(this.inputF, now, node, 6L);
+        checkMatch(inputA, now, node, 3L);
+        checkMatch(inputB, now, node, 4L);
+        checkMatch(inputC, now, node, 4L);
+        checkMatch(inputD, now, node, 6L);
+        checkMatch(inputE, now, node, 5L);
+        checkMatch(inputF, now, node, 6L);
     }
 
     @Test
@@ -322,7 +322,7 @@ public class DatedEvaluatorTest {
 
         final List<String> inputs = Arrays.asList("CLM", "A102059551", "0152035", "0151488",
                 "ELEC", "NMEM", "FUTURE", "Y2", "381", "Equity indices", "IFLL", "ER");
-        final Optional<UUID> result = Evaluator.evaluate(inputs, now, node);
+        final Optional<UUID> result = Evaluator.singleEvaluate(inputs, now, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, 1L), result.get());
     }
@@ -332,12 +332,12 @@ public class DatedEvaluatorTest {
     }
 
     private void checkNoMatch(final List<String> input, final Instant time, final TreeNode node) {
-        final Optional<UUID> result = Evaluator.evaluate(input, time, node);
+        final Optional<UUID> result = Evaluator.singleEvaluate(input, time, node);
         assertFalse(result.isPresent());
     }
 
     private void checkMatch(final List<String> input, final Instant time, final TreeNode node, final long id) {
-        final Optional<UUID> result = Evaluator.evaluate(input, time, node);
+        final Optional<UUID> result = Evaluator.singleEvaluate(input, time, node);
         assertTrue(result.isPresent());
         assertEquals(new UUID(0, id), result.get());
     }
