@@ -22,9 +22,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.swblocks.decisiontree.domain.DecisionTreeRule;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.decisiontree.tree.DecisionTreeFactory;
 import org.swblocks.decisiontree.tree.DecisionTreeType;
+import org.swblocks.decisiontree.tree.InputDriver;
 import org.swblocks.decisiontree.tree.TimeSlicedRootNode;
 import org.swblocks.decisiontree.tree.TreeNode;
 import org.swblocks.jbl.eh.EhSupport;
@@ -148,7 +150,18 @@ public class DecisionTree {
     public List<OutputResults> getEvaluationsFor(final Input input) {
         final List<UUID> result = Evaluator.evaluate(input.getEvaluationInputs(), input.getEvaluationDate(),
                 node);
-
+        for (final UUID id : result) {
+            final DecisionTreeRule rule = ruleSet.getRules().get(id);
+            final Optional<InputDriver[]> evaluations = rule.getEvaluations();
+            if (evaluations.isPresent()) {
+                for (final InputDriver driver : evaluations.get()) {
+                    final boolean evaluate = driver.evaluate(input.getEvaluationInputs().get(0));
+                    if (!evaluate) {
+                        result.remove(id);
+                    }
+                }
+            }
+        }
         return result.stream().map(uuid ->
                 new OutputResults(ruleSet.getRules().get(uuid))).collect(Collectors.toList());
     }

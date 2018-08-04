@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.swblocks.decisiontree.domain.WeightedDriver;
+import org.swblocks.decisiontree.tree.InputDriver;
 import org.swblocks.decisiontree.tree.InputValueType;
 import org.swblocks.jbl.eh.EhSupport;
 
@@ -38,18 +40,21 @@ public class Input {
     public static final String EMPTY = "";
     private final SortedMap<WeightedDriver, String> driverMap;
     private final List<WeightedDriver> driverList;
+    private final List<InputDriver> evaluations = new ArrayList<>(1);
     private final String ruleSetName;
+    private final Map<String, String> evaluationMap;
     private final Instant evaluationDate;
 
     private Input(final String ruleSetName, final List<WeightedDriver> drivers, final List<String> searchValues,
-                  final Instant evaluationDate) {
+                  final Map<String, String> evaluations, final Instant evaluationDate) {
         this.ruleSetName = ruleSetName;
         this.evaluationDate = evaluationDate;
-        this.driverList = drivers;
-        this.driverMap = new TreeMap<>();
+        driverList = drivers;
+        driverMap = new TreeMap<>();
+        this.evaluationMap = evaluations;
         int counter = 0;
         for (final WeightedDriver weightedDriver : drivers) {
-            this.driverMap.put(weightedDriver, searchValues.get(counter));
+            driverMap.put(weightedDriver, searchValues.get(counter));
             ++counter;
         }
     }
@@ -72,7 +77,8 @@ public class Input {
                         final String... searchValues) {
         EhSupport.ensureArg(driverNames.size() == searchValues.length,
                 "The number of Search Values does not match the number of Drivers.");
-        return new Input(ruleSetName, driverNames, Arrays.asList(searchValues), Instant.now());
+        return new Input(ruleSetName, driverNames, Arrays.asList(searchValues), Collections.emptyMap(),
+                Instant.now());
     }
 
     /**
@@ -80,12 +86,27 @@ public class Input {
      *
      * <p>Should be called from the {@link DecisionTree} access class.
      */
-    static Input create(final String ruleSetName, final List<WeightedDriver> driverNames, final Instant evaluationDate,
+    static Input create(final String ruleSetName, final List<WeightedDriver> driverNames,
+                        final Instant evaluationDate, final String... searchValues) {
+        EhSupport.ensureArg(driverNames.size() == searchValues.length,
+                "The number of Search Values does not match the number of Drivers.");
+        EhSupport.ensureArg(evaluationDate != null, "The evaluation date cannot be null");
+        return new Input(ruleSetName, driverNames, Arrays.asList(searchValues), Collections.emptyMap(),
+                evaluationDate);
+    }
+
+    /**
+     * Creates an Input for a RuleSet.
+     *
+     * <p>Should be called from the {@link DecisionTree} access class.
+     */
+    static Input create(final String ruleSetName, final List<WeightedDriver> driverNames,
+                        final Instant evaluationDate, final Map<String, String> evaluationMap,
                         final String... searchValues) {
         EhSupport.ensureArg(driverNames.size() == searchValues.length,
                 "The number of Search Values does not match the number of Drivers.");
         EhSupport.ensureArg(evaluationDate != null, "The evaluation date cannot be null");
-        return new Input(ruleSetName, driverNames, Arrays.asList(searchValues), evaluationDate);
+        return new Input(ruleSetName, driverNames, Arrays.asList(searchValues), evaluationMap, evaluationDate);
     }
 
     /**
@@ -97,7 +118,7 @@ public class Input {
                         final Instant evaluationDate) {
         final List<String> wildcards = new ArrayList<>(driverNames.size());
         driverNames.forEach(weightedDriver -> wildcards.add(InputValueType.WILDCARD));
-        return new Input(ruleSetName, driverNames, wildcards, evaluationDate);
+        return new Input(ruleSetName, driverNames, wildcards, Collections.emptyMap(), evaluationDate);
     }
 
     /**
@@ -106,7 +127,7 @@ public class Input {
      * @return name of the ruleset
      */
     public String getRuleSetName() {
-        return this.ruleSetName;
+        return ruleSetName;
     }
 
     /**
@@ -119,8 +140,8 @@ public class Input {
     public boolean putValueForDriverName(final String driverName, final String value) {
         // Check for valid key before accepting
         final WeightedDriver key = getWeightedDriverForDriverName(driverName);
-        if (key != null && this.driverMap.containsKey(key)) {
-            this.driverMap.put(key, value);
+        if (key != null && driverMap.containsKey(key)) {
+            driverMap.put(key, value);
             return true;
         }
 
@@ -129,15 +150,15 @@ public class Input {
 
     private WeightedDriver getWeightedDriverForDriverName(final String driverName) {
         // Check for valid key before accepting
-        final int driverPosition = this.driverList.indexOf(new WeightedDriver(driverName, 0));
+        final int driverPosition = driverList.indexOf(new WeightedDriver(driverName, 0));
         if (driverPosition >= 0) {
-            return this.driverList.get(driverPosition);
+            return driverList.get(driverPosition);
         }
         return null;
     }
 
     public String getValueForDriverName(final String driverName) {
-        return this.driverMap.get(getWeightedDriverForDriverName(driverName));
+        return driverMap.get(getWeightedDriverForDriverName(driverName));
     }
 
     /**
@@ -156,7 +177,7 @@ public class Input {
      * @return Instant
      */
     public Instant getEvaluationDate() {
-        return this.evaluationDate;
+        return evaluationDate;
     }
 
     /**
@@ -165,15 +186,15 @@ public class Input {
      * @return List of Strings to be evaluated.
      */
     public List<String> getEvaluationInputs() {
-        return this.driverMap.values().stream().collect(collectingAndThen(Collectors.toList(),
+        return driverMap.values().stream().collect(collectingAndThen(Collectors.toList(),
                 Collections::unmodifiableList));
     }
 
     @Override
     public String toString() {
-        return "Input{driverMap=" + this.driverMap +
-                ", ruleSetName='" + this.ruleSetName + '\'' +
-                ", evaluationDate=" + this.evaluationDate +
+        return "Input{driverMap=" + driverMap +
+                ", ruleSetName='" + ruleSetName + '\'' +
+                ", evaluationDate=" + evaluationDate +
                 '}';
     }
 }

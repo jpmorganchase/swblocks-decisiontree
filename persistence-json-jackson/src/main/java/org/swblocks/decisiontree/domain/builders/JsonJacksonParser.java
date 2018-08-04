@@ -19,6 +19,7 @@ package org.swblocks.decisiontree.domain.builders;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,7 @@ public class JsonJacksonParser implements RuleBuilderParser {
     @Override
     public DecisionTreeRuleSet parseRuleSet(final InputStream inputStream) {
         return EhSupport.propagateFn(() -> {
-            try (JsonParser parser = new JsonFactory().createParser(inputStream)) {
+            try (final JsonParser parser = new JsonFactory().createParser(inputStream)) {
 
                 EhSupport.ensureArg(parser.nextToken() == JsonToken.START_OBJECT, "InputStream is not valid JSON");
 
@@ -96,7 +97,8 @@ public class JsonJacksonParser implements RuleBuilderParser {
                     }
                 }
                 return new DecisionTreeRuleSet(ruleSetName, rules.stream().collect(
-                        Collectors.toMap(DecisionTreeRule::getRuleIdentifier, r -> r)), drivers, cache, groups);
+                        Collectors.toMap(DecisionTreeRule::getRuleIdentifier, r -> r)), drivers,
+                        Collections.emptyList(), cache, groups);
             }
         });
     }

@@ -69,6 +69,7 @@ import org.swblocks.jbl.builders.Builder;
  */
 public final class RuleBuilder {
     private final List<String> drivers = new ArrayList<>(1);
+    private final List<String> evaluations = new ArrayList<>(1);
     private DriverCache cache = null;
     private Map<String, String> outputs = new HashMap<>();
     private UUID id;
@@ -102,10 +103,15 @@ public final class RuleBuilder {
         builder.drivers.forEach(driver ->
                 inputDrivers.add(DomainSerialiser.createInputDriver(driver, builder.cache).get()));
 
+        final List<InputDriver> evaluations = new ArrayList<>(builder.evaluations.size());
+        builder.evaluations.forEach(evaluation ->
+                evaluations.add(DomainSerialiser.createInputDriver(evaluation, builder.cache).get()));
+
         return new DecisionTreeRule(builder.id != null ? builder.id :
                 builder.alternativeId != null ? new UUID(0, builder.alternativeId) : UUID.randomUUID(),
                 builder.code != null ? builder.code : UUID.randomUUID(),
-                inputDrivers.toArray(new InputDriver[inputDrivers.size()]),
+                inputDrivers.toArray(new InputDriver[0]),
+                evaluations.toArray(new InputDriver[0]),
                 builder.outputs,
                 builder.startTime,
                 builder.endTime);
@@ -148,7 +154,7 @@ public final class RuleBuilder {
      * @param uuid Unique Id of the rule
      */
     public void setCode(final UUID uuid) {
-        this.code = uuid;
+        code = uuid;
     }
 
     /**
@@ -157,9 +163,9 @@ public final class RuleBuilder {
      * @param driverCount number of input drivers required.
      */
     public void setDriverCount(final Long driverCount) {
-        if (this.drivers.size() != driverCount) {
+        if (drivers.size() != driverCount) {
             throw new IllegalArgumentException("Number of drivers values expected " + driverCount +
-                    ". Failure was in rule " + this.id + " id");
+                    ". Failure was in rule " + id + " id");
         }
     }
 
@@ -173,6 +179,17 @@ public final class RuleBuilder {
      */
     public RuleBuilder input(final List<String> drivers) {
         this.drivers.addAll(drivers);
+        return this;
+    }
+
+    /**
+     * Sets the evaluations for this rule.
+     *
+     * @param evaluations List of string inputs.
+     * @return this for method chaining.
+     */
+    public RuleBuilder evaluations(final List<String> evaluations) {
+        this.evaluations.addAll(evaluations);
         return this;
     }
 

@@ -25,13 +25,15 @@ import java.util.UUID;
 
 import org.junit.Test;
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
+import org.swblocks.decisiontree.tree.InputDriver;
 import org.swblocks.decisiontree.tree.InputValueType;
 import org.swblocks.jbl.builders.Builder;
-import org.swblocks.decisiontree.tree.InputDriver;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for {@link RuleBuilder}.
@@ -59,6 +61,7 @@ public class RuleBuilderTest {
         assertEquals(InputValueType.STRING, derivedInputDrivers[1].getType());
 
         assertEquals(new UUID(0, 1), rule.getRuleIdentifier());
+        assertFalse(rule.getEvaluations().isPresent());
         assertEquals("result", rule.getOutputs().get("outputDriver"));
         assertEquals(DecisionTreeRule.EPOCH, rule.getStart());
         assertEquals(DecisionTreeRule.MAX, rule.getEnd());
@@ -86,6 +89,7 @@ public class RuleBuilderTest {
         assertEquals(InputValueType.STRING, derivedInputDrivers[1].getType());
 
         assertEquals(new UUID(0, 3), rule.getRuleIdentifier());
+        assertFalse(rule.getEvaluations().isPresent());
         assertEquals("result", rule.getOutputs().get("outputDriver"));
         assertEquals(DecisionTreeRule.EPOCH, rule.getStart());
         assertEquals(DecisionTreeRule.MAX, rule.getEnd());
@@ -111,6 +115,7 @@ public class RuleBuilderTest {
 
         assertEquals("test2.*", derivedInputDrivers[1].getValue());
         assertEquals(InputValueType.REGEX, derivedInputDrivers[1].getType());
+        assertFalse(rule.getEvaluations().isPresent());
 
         assertEquals(new UUID(0, 1), rule.getRuleIdentifier());
         assertEquals("result", rule.getOutputs().get("outputDriver"));
@@ -142,6 +147,7 @@ public class RuleBuilderTest {
 
         assertEquals(new UUID(0, 1), rule.getRuleIdentifier());
         assertEquals("result", rule.getOutputs().get("outputDriver"));
+        assertFalse(rule.getEvaluations().isPresent());
         assertEquals(DecisionTreeRule.EPOCH, rule.getStart());
         assertEquals(DecisionTreeRule.MAX, rule.getEnd());
     }
@@ -160,6 +166,35 @@ public class RuleBuilderTest {
                 .build();
 
         assertNotNull(rule);
+    }
+
+    @Test
+    public void testConstructionWithEvaluations() {
+        final Builder<RuleBuilder, DecisionTreeRule> ruleBuilder = RuleBuilder.creator();
+        assertNotNull(ruleBuilder);
+
+        final List<String> testInputs = Arrays.asList("test1", "test2");
+        ruleBuilder.with(RuleBuilder::input, testInputs);
+        ruleBuilder.with(RuleBuilder::setDriverCount, 2L);
+        ruleBuilder.with(RuleBuilder::evaluations, Arrays.asList("Eval1", "Eval2"));
+        ruleBuilder.with(RuleBuilder::setId, new UUID(0, 1));
+        ruleBuilder.with(RuleBuilder::output, Collections.singletonMap("outputDriver", "result"));
+        final DecisionTreeRule rule = ruleBuilder.build();
+        assertNotNull(rule);
+
+        assertTrue(rule.getEvaluations().isPresent());
+        final InputDriver[] derivedEvaluations = rule.getEvaluations().get();
+
+        assertEquals("Eval1", derivedEvaluations[0].getValue());
+        assertEquals(InputValueType.STRING, derivedEvaluations[0].getType());
+
+        assertEquals("Eval2", derivedEvaluations[1].getValue());
+        assertEquals(InputValueType.STRING, derivedEvaluations[1].getType());
+
+        assertEquals(new UUID(0, 1), rule.getRuleIdentifier());
+        assertEquals("result", rule.getOutputs().get("outputDriver"));
+        assertEquals(DecisionTreeRule.EPOCH, rule.getStart());
+        assertEquals(DecisionTreeRule.MAX, rule.getEnd());
     }
 
     @Test(expected = IllegalArgumentException.class)

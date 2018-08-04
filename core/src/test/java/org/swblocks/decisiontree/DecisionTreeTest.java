@@ -55,6 +55,31 @@ public class DecisionTreeTest {
     }
 
     @Test
+    public void testDecisionTreeAdditionalEvaluation() {
+        final DecisionTree decisionTree = DecisionTree.instanceOf(
+                new Loader<DecisionTreeRuleSet>() {
+                    @Override
+                    public boolean test(final Result result) {
+                        return false;
+                    }
+
+                    @Override
+                    public Result<DecisionTreeRuleSet> get() {
+                        return Result.success(
+                                CommisionRuleSetSupplier.getCommissionRuleSetWithExtraEvaluations()
+                                        .build());
+                    }
+                },
+                DecisionTreeType.SINGLE);
+
+        final Input input = decisionTree.createInputs("VOICE", "CME", "ED", "US", "RATE");
+
+        final Optional<OutputResults> results = decisionTree.getSingleEvaluationFor(input);
+        assertTrue(results.isPresent());
+        assertEquals("1.4", results.get().results().get("Rate"));
+    }
+
+    @Test
     @Deprecated
     public void testDecisionTreeEvaluationWithDeprecatedMethod() {
         final DecisionTree decisionTree = DecisionTree.instanceOf(new CommisionRuleSetSupplier(),

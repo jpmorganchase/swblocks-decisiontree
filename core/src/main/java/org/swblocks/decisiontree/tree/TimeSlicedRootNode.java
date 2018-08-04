@@ -55,7 +55,7 @@ public final class TimeSlicedRootNode implements TreeNode {
     List<Instant> getTimes() {
         final Set<Instant> times = new TreeSet<>();
 
-        this.ruleSet.getRules().forEach((ruleId, rule) -> {
+        ruleSet.getRules().forEach((ruleId, rule) -> {
             times.add(rule.getStart());
             times.add(rule.getEnd());
         });
@@ -89,14 +89,14 @@ public final class TimeSlicedRootNode implements TreeNode {
         final Optional<Range<Instant>> activeRange = getActiveRange(time);
 
         if (activeRange.isPresent()) {
-            this.ruleSet.getRules().forEach((ruleId, rule) -> {
+            ruleSet.getRules().forEach((ruleId, rule) -> {
                 if (PREDICATE_RULE_START_CHECK.test(activeRange.get().getStart(), rule.getStart()) &&
                         PREDICATE_RULE_END_CHECK.test(activeRange.get().getFinish(), rule.getEnd())) {
                     ruleMap.put(ruleId, rule);
                 }
             });
-            return Optional.of(new DecisionTreeRuleSet(this.ruleSet.getName(), ruleMap, this.ruleSet.getDriverNames(),
-                    this.ruleSet.getDriverCache(), this.ruleSet.getValueGroups()));
+            return Optional.of(new DecisionTreeRuleSet(ruleSet.getName(), ruleMap, ruleSet.getDriverNames(),
+                    Collections.emptyList(), ruleSet.getDriverCache(), ruleSet.getValueGroups()));
         }
         return Optional.empty();
     }
@@ -129,7 +129,7 @@ public final class TimeSlicedRootNode implements TreeNode {
     Optional<TreeNode> getTreeNodeForTime(final Instant time) {
         Optional<Range<Instant>> activeRange = Optional.empty();
 
-        for (final Range<Instant> range : this.cache.keys()) {
+        for (final Range<Instant> range : cache.keys()) {
             if (Range.RANGE_CHECK.test(range, time)) {
                 activeRange = Optional.of(range);
                 break;
@@ -137,7 +137,7 @@ public final class TimeSlicedRootNode implements TreeNode {
         }
 
         if (activeRange.isPresent()) {
-            return this.cache.get(activeRange);
+            return cache.get(activeRange);
         }
 
         Optional<TreeNode> rootSlicedNode = Optional.empty();
@@ -148,7 +148,7 @@ public final class TimeSlicedRootNode implements TreeNode {
             final TreeNode newNode = DecisionTreeFactory.constructDecisionTree(decisionTreeRuleSet.get(),
                     DecisionTreeType.SINGLE);
             rootSlicedNode = Optional.of(newNode);
-            this.cache.put(activeRange.get(), rootSlicedNode);
+            cache.put(activeRange.get(), rootSlicedNode);
         }
 
         return rootSlicedNode;

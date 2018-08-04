@@ -17,6 +17,7 @@
 package org.swblocks.decisiontree;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.swblocks.decisiontree.tree.InputDriver;
@@ -39,6 +40,13 @@ public interface TreeRule {
      * @return Array of input drivers
      */
     InputDriver[] getDrivers();
+
+    /**
+     * Returns the optional array of the input drivers used to evaluate for the rule.
+     *
+     * @return Optional Array of input drivers used to evaluate against the inputs
+     */
+    Optional<InputDriver[]> getEvaluations();
 
     /**
      * Map of name/value pairs of the output definition of the rule.

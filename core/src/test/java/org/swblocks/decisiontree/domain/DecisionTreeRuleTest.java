@@ -44,13 +44,17 @@ public class DecisionTreeRuleTest {
 
     @Test
     public void testConstructor() {
-        final InputDriver[] testInputDriver = getInputDriverArray();
+        final InputDriver[] testInputDriver = getInputDriverArray("input1");
+        final InputDriver[] testEvaluationDriver = getInputDriverArray("output1");
         final Instant startInstance = Instant.now();
         final Instant endInstance = startInstance.plus(1, ChronoUnit.DAYS);
         final DecisionTreeRule decisionTreeRule = new DecisionTreeRule(new UUID(0, 1),
-                new UUID(0, 2), testInputDriver, this.outputDriver, startInstance, endInstance);
+                new UUID(0, 2), testInputDriver, testEvaluationDriver, this.outputDriver,
+                startInstance, endInstance);
 
         assertArrayEquals(testInputDriver, decisionTreeRule.getDrivers());
+        assertTrue(decisionTreeRule.getEvaluations().isPresent());
+        assertArrayEquals(testEvaluationDriver, decisionTreeRule.getEvaluations().get());
         assertEquals(new UUID(0, 1), decisionTreeRule.getRuleIdentifier());
         assertEquals(new UUID(0, 2), decisionTreeRule.getRuleCode());
         assertEquals("result", decisionTreeRule.getOutputs().get("outputDriver"));
@@ -174,6 +178,27 @@ public class DecisionTreeRuleTest {
         assertFalse(rule.isDuplicateInputData(new DecisionTreeRule(new UUID(0, 1), UUID.randomUUID(),
                 getInputDriverArray(), this.outputDriver, null, null)));
         assertFalse(rule.isDuplicateInputData(null));
+    }
+
+    @Test
+    public void testRuleDuplicateEvaluationCheck() {
+        final DecisionTreeRule rule = new DecisionTreeRule(new UUID(0, 1), UUID.randomUUID(),
+                getInputDriverArray("input1", "input2"), getInputDriverArray("eval1", "eval2"),
+                this.outputDriver, null, null);
+
+        assertTrue(rule.isDuplicateEvaluations(new DecisionTreeRule(new UUID(0, 1), UUID.randomUUID(),
+                getInputDriverArray("input1", "input2"), getInputDriverArray("eval1", "eval2"),
+                this.outputDriver, null, null)));
+        assertFalse(rule.isDuplicateEvaluations(new DecisionTreeRule(new UUID(0, 1), UUID.randomUUID(),
+                getInputDriverArray("input1", "input3"), getInputDriverArray("input1", "input2"),
+                this.outputDriver, null, null)));
+        assertFalse(rule.isDuplicateEvaluations(new DecisionTreeRule(new UUID(0, 1), UUID.randomUUID(),
+                getInputDriverArray("input1", "input2"), getInputDriverArray("eval1"),
+                this.outputDriver, null, null)));
+        assertFalse(rule.isDuplicateEvaluations(null));
+        assertFalse(rule.isDuplicateEvaluations(new DecisionTreeRule(new UUID(0, 1), UUID.randomUUID(),
+                getInputDriverArray("input1", "input2"), this.outputDriver, null, null)));
+        assertFalse(rule.isDuplicateEvaluations(null));
     }
 
     @Test
