@@ -22,13 +22,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.hamcrest.collection.IsMapContaining;
+import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Test;
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
 import org.swblocks.jbl.util.Range;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test class for {@link ResultNode} created using the {@link NodeSupplier}.
@@ -113,7 +113,8 @@ public class ResultNodeTest {
 
         assertEquals(new UUID(0, 1), resultNode.getRuleIdentifier());
         assertEquals(14L, resultNode.getWeight());
-
+        assertTrue(resultNode.getEvaluations().isPresent());
+        assertEquals("IR:0|1000", resultNode.getEvaluations().get()[0].getValue());
         assertTrue(resultNode.evaluate("test1"));
         assertTrue(resultNode.evaluate("test4"));
 
@@ -179,7 +180,8 @@ public class ResultNodeTest {
     private DecisionTreeRule getRule() {
         return new DecisionTreeRule(new UUID(0, 1), UUID.randomUUID(),
                 getInputDriverArray("*", "CME", "S&P", "US", "*"),
-                Collections.emptyMap(), Instant.EPOCH, DecisionTreeRule.MAX);
+                getInputDriverArray("IR:0|1000"),
+                Collections.singletonMap("Rate","10"), Instant.EPOCH, DecisionTreeRule.MAX);
     }
 
     private InputDriver[] getInputDriverArray(final String... inputs) {

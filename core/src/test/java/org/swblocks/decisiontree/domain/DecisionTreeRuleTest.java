@@ -63,6 +63,24 @@ public class DecisionTreeRuleTest {
     }
 
     @Test
+    public void testConstructorWithBlankEvaluations() {
+        final InputDriver[] testInputDriver = getInputDriverArray("input1");
+        final Instant startInstance = Instant.now();
+        final Instant endInstance = startInstance.plus(1, ChronoUnit.DAYS);
+        final DecisionTreeRule decisionTreeRule = new DecisionTreeRule(new UUID(0, 1),
+                new UUID(0, 2), testInputDriver, this.outputDriver,
+                startInstance, endInstance);
+
+        assertArrayEquals(testInputDriver, decisionTreeRule.getDrivers());
+        assertFalse(decisionTreeRule.getEvaluations().isPresent());
+        assertEquals(new UUID(0, 1), decisionTreeRule.getRuleIdentifier());
+        assertEquals(new UUID(0, 2), decisionTreeRule.getRuleCode());
+        assertEquals("result", decisionTreeRule.getOutputs().get("outputDriver"));
+        assertEquals(startInstance, decisionTreeRule.getStart());
+        assertEquals(endInstance, decisionTreeRule.getEnd());
+    }
+
+    @Test
     public void testDefaultDatedRangeConstructor() {
         final DecisionTreeRule decisionTreeRule =
                 new DecisionTreeRule(new UUID(0, 1), new UUID(0, 2), getInputDriverArray("input1", "input2"),

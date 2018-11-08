@@ -17,9 +17,7 @@
 package org.swblocks.decisiontree;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
@@ -89,6 +87,18 @@ public class DecisionTree {
 
     /**
      * Creates the holder and populates the search values for the Decision Tree evaluation.
+     * Includes a Map of evaluation criteria to be applied to the nodes
+     *
+     * @param evaluationsMap map of evaluation names to actual values.
+     * @param searchValues vararg search values in weighted order.
+     * @return {@link Input}
+     */
+    public Input createInputs(final Map<String, String> evaluationsMap, final String... searchValues) {
+        return Input.create(ruleSet.getName(), ruleSet.getWeightedDrivers(), Instant.now(), evaluationsMap, searchValues);
+    }
+
+    /**
+     * Creates the holder and populates the search values for the Decision Tree evaluation.
      *
      * @param evaluationDate date of evaluation for rules.
      * @param searchValues   vararg search values in weighted order.
@@ -149,19 +159,7 @@ public class DecisionTree {
      */
     public List<OutputResults> getEvaluationsFor(final Input input) {
         final List<UUID> result = Evaluator.evaluate(input.getEvaluationInputs(), input.getEvaluationDate(),
-                node);
-        for (final UUID id : result) {
-            final DecisionTreeRule rule = ruleSet.getRules().get(id);
-            final Optional<InputDriver[]> evaluations = rule.getEvaluations();
-            if (evaluations.isPresent()) {
-                for (final InputDriver driver : evaluations.get()) {
-                    final boolean evaluate = driver.evaluate(input.getEvaluationInputs().get(0));
-                    if (!evaluate) {
-                        result.remove(id);
-                    }
-                }
-            }
-        }
+                input.getEvaluationMap(), node);
         return result.stream().map(uuid ->
                 new OutputResults(ruleSet.getRules().get(uuid))).collect(Collectors.toList());
     }

@@ -309,7 +309,7 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
             final Instant finish, final long ruleId, final String rate) {
         return ruleSetBuilder.with(RuleSetBuilder::rule, RuleBuilder.creator()
                 .with(RuleBuilder::input, Arrays.asList(exmethod, exchange, product, region, asset))
-                .with(RuleBuilder::evaluations, Arrays.asList(evaluation))
+                .with(RuleBuilder::evaluations, Collections.singletonList(evaluation))
                 .with(RuleBuilder::start, start)
                 .with(RuleBuilder::end, finish)
                 .with(RuleBuilder::setId, new UUID(0L, ruleId))

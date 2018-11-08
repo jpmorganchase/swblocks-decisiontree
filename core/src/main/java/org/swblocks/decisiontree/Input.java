@@ -197,4 +197,8 @@ public class Input {
                 ", evaluationDate=" + evaluationDate +
                 '}';
     }
+
+    public Map<String, String> getEvaluationMap() {
+        return evaluationMap;
+    }
 }

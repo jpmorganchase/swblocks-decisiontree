@@ -131,7 +131,7 @@ public final class DecisionTreeRule implements TreeRule {
      */
     @Override
     public Optional<InputDriver[]> getEvaluations() {
-        if (evaluations.length == 0) {
+        if (evaluations == null || evaluations.length == 0) {
             return Optional.empty();
         }
         return Optional.of(evaluations);

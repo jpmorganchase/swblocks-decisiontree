@@ -18,6 +18,7 @@ package org.swblocks.decisiontree.examples;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -40,16 +41,19 @@ public class DecisionEvaluationExample {
 
     @Before
     public void setUp() {
-        builder = RuleSetBuilder.creator("commissions",
-                Arrays.asList("Test", "Company", "Group", "Team"));
+        builder = RuleSetBuilder.creator("testcoverage",
+                Arrays.asList("Company", "Group", "Team"))
+                .with(RuleSetBuilder::setEvaluationNames, Collections.singletonList("UTC"));
 
         builder.with(RuleSetBuilder::rule, RuleBuilder.creator()
-                .with(RuleBuilder::input, Arrays.asList("UTC", "*", "*", "*"))
-                .with(RuleBuilder::output, Collections.singletonMap("Coverage", "IR:0|70")));
+                .with(RuleBuilder::input, Arrays.asList("*", "*", "*"))
+                .with(RuleBuilder::evaluations, Collections.singletonList("IR:50|100"))
+                .with(RuleBuilder::output, Collections.singletonMap("Result", "lowcoverage")));
 
         builder.with(RuleSetBuilder::rule, RuleBuilder.creator()
-                .with(RuleBuilder::input, Arrays.asList("Sonar", "*", "*", "*"))
-                .with(RuleBuilder::output, Collections.singletonMap("Critical", "0")));
+                .with(RuleBuilder::input, Arrays.asList("ACME", "*", "*"))
+                .with(RuleBuilder::evaluations, Collections.singletonList("IR:70|100"))
+                .with(RuleBuilder::output, Collections.singletonMap("Result", "highcoverage")));
     }
 
     @Test
@@ -61,10 +65,9 @@ public class DecisionEvaluationExample {
         final DecisionTree decisionTree = DecisionTree.instanceOf(BuilderLoader.instanceOf(builder),
                 DecisionTreeType.SINGLE);
 
-        final Input input = decisionTree.createInputs("UTC", "ACME", "Games", "Video");
-        final Optional<OutputResults> evaluationFor = decisionTree.getSingleEvaluationFor(input);
-        logResult(input, evaluationFor);
-
+        final Input input = decisionTree.createInputs(Collections.singletonMap("UTC", "55"), "ACME", "Games", "Video");
+        final List<OutputResults> evaluationFor = decisionTree.getEvaluationsFor(input);
+        evaluationFor.forEach((output)->logResult(input, Optional.ofNullable(output)));
     }
 
     private void logResult(final Input input, final Optional<OutputResults> evaluationFor) {
