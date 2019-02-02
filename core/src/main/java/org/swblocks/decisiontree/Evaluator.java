@@ -17,10 +17,12 @@
 package org.swblocks.decisiontree;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-import org.swblocks.decisiontree.domain.DecisionTreeRule;
-import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.decisiontree.tree.InputDriver;
 import org.swblocks.decisiontree.tree.TreeNode;
 
@@ -49,7 +51,7 @@ public final class Evaluator {
      */
     public static Optional<UUID> singleEvaluate(final List<String> searchInputs, final Instant time,
                                                 final TreeNode rootNode) {
-        final List<UUID> results = evaluate(searchInputs, time, Collections.emptyMap(), rootNode);
+        final List<UUID> results = evaluate(searchInputs, time, Collections.emptyList(), rootNode);
 
         if (results.isEmpty()) {
             return Optional.empty();
@@ -72,22 +74,21 @@ public final class Evaluator {
      * @return List of highest weighted matching unique id's or {@code Collections.emptyList} if no match
      */
     public static List<UUID> evaluate(final List<String> searchInputs, final Instant time,
-                                      final Map<String, String> evaluationMap,
+                                      final List<String> evaluationInputs,
                                       final TreeNode rootNode) {
         List<EvaluationResult> results = evaluateAllResults(searchInputs, time, rootNode);
 
         if (results.isEmpty()) {
             return Collections.emptyList();
-        } else if (results.size() == 1) {
-            return Collections.singletonList(results.get(0).getRuleIdentifier());
         }
 
         final List<EvaluationResult> evaluatedResults = new ArrayList<>(results.size());
         for (final EvaluationResult id : results) {
             final Optional<InputDriver[]> evaluations = id.getEvaluations();
             if (evaluations.isPresent()) {
-                for (final InputDriver driver : evaluations.get()) {
-                    final boolean evaluate = driver.evaluate(evaluationMap.get("UTC"));
+                for (int i = 0; i < evaluations.get().length; i++) {
+                    final InputDriver driver = evaluations.get()[i];
+                    final boolean evaluate = driver.evaluate(evaluationInputs.get(i));
                     if (evaluate) {
                         evaluatedResults.add(id);
                     }
@@ -97,6 +98,11 @@ public final class Evaluator {
             }
         }
         results = evaluatedResults;
+        if (results.isEmpty()) {
+            return Collections.emptyList();
+        } else if (results.size() == 1) {
+            return Collections.singletonList(results.get(0).getRuleIdentifier());
+        }
         final List<UUID> bestResults = new ArrayList<>(results.size());
         EvaluationResult bestNode = results.get(0);
         for (final EvaluationResult result : results) {

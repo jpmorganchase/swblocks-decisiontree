@@ -17,14 +17,16 @@
 package org.swblocks.decisiontree;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.swblocks.decisiontree.domain.DecisionTreeRule;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
 import org.swblocks.decisiontree.tree.DecisionTreeFactory;
 import org.swblocks.decisiontree.tree.DecisionTreeType;
-import org.swblocks.decisiontree.tree.InputDriver;
 import org.swblocks.decisiontree.tree.TimeSlicedRootNode;
 import org.swblocks.decisiontree.tree.TreeNode;
 import org.swblocks.jbl.eh.EhSupport;
@@ -159,7 +161,7 @@ public class DecisionTree {
      */
     public List<OutputResults> getEvaluationsFor(final Input input) {
         final List<UUID> result = Evaluator.evaluate(input.getEvaluationInputs(), input.getEvaluationDate(),
-                input.getEvaluationMap(), node);
+                new ArrayList<>(input.getEvaluationMap().values()), node);
         return result.stream().map(uuid ->
                 new OutputResults(ruleSet.getRules().get(uuid))).collect(Collectors.toList());
     }
