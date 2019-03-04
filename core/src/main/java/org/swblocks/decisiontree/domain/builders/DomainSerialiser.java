@@ -173,7 +173,8 @@ public final class DomainSerialiser {
                             inputDriver = new IntegerRangeDriver(currentDriver, new Range<>(MIN_INTEGER,
                                     Integer.parseInt(intTokenizer.nextToken())));
                         } else {
-                            inputDriver = new IntegerRangeDriver(currentDriver, new Range<>(Integer.parseInt(firstToken),
+                            inputDriver = new IntegerRangeDriver(currentDriver,
+                                    new Range<>(Integer.parseInt(firstToken),
                                     MAX_INTEGER));
                         }
                     }

@@ -94,7 +94,8 @@ public class DecisionTree {
      * @return {@link Input}
      */
     public Input createInputs(final Map<String, String> evaluationsMap, final String... searchValues) {
-        return Input.create(ruleSet.getName(), ruleSet.getWeightedDrivers(), Instant.now(), evaluationsMap, searchValues);
+        return Input.create(ruleSet.getName(), ruleSet.getWeightedDrivers(), Instant.now(), evaluationsMap,
+                searchValues);
     }
 
     /**

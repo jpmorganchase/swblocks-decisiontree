@@ -71,7 +71,8 @@ public class SingleDecisionTreeFailurePathTest {
 
         final TreeNode node = constructTree(ruleSetBuilder);
 
-        final Optional<UUID> result = Evaluator.singleEvaluate(Arrays.asList("ONE", "TWO", "THREE", "FOUR"), null, node);
+        final Optional<UUID> result = Evaluator.singleEvaluate(
+                Arrays.asList("ONE", "TWO", "THREE", "FOUR"), null, node);
         Assert.assertTrue(result.isPresent());
         Assert.assertEquals(new UUID(0, 2), result.get());
     }
