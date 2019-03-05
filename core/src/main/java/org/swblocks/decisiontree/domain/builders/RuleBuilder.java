@@ -154,7 +154,7 @@ public final class RuleBuilder {
      * @param uuid Unique Id of the rule
      */
     public void setCode(final UUID uuid) {
-        code = uuid;
+        this.code = uuid;
     }
 
     /**

@@ -98,7 +98,7 @@ public final class DecisionTreeRule implements TreeRule {
      * @return true is rule is active at time.
      */
     public boolean isActiveAt(final Instant time) {
-        return time.isAfter(start) && time.isBefore(end);
+        return time.isAfter(this.start) && time.isBefore(this.end);
     }
 
     /**

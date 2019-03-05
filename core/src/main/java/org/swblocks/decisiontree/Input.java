@@ -49,8 +49,8 @@ public class Input {
                   final Map<String, String> evaluations, final Instant evaluationDate) {
         this.ruleSetName = ruleSetName;
         this.evaluationDate = evaluationDate;
-        driverList = drivers;
-        driverMap = new TreeMap<>();
+        this.driverList = drivers;
+        this.driverMap = new TreeMap<>();
         this.evaluationMap = evaluations;
         int counter = 0;
         for (final WeightedDriver weightedDriver : drivers) {
@@ -127,7 +127,7 @@ public class Input {
      * @return name of the ruleset
      */
     public String getRuleSetName() {
-        return ruleSetName;
+        return this.ruleSetName;
     }
 
     /**
@@ -140,8 +140,8 @@ public class Input {
     public boolean putValueForDriverName(final String driverName, final String value) {
         // Check for valid key before accepting
         final WeightedDriver key = getWeightedDriverForDriverName(driverName);
-        if (key != null && driverMap.containsKey(key)) {
-            driverMap.put(key, value);
+        if (key != null && this.driverMap.containsKey(key)) {
+            this.driverMap.put(key, value);
             return true;
         }
 
@@ -150,9 +150,9 @@ public class Input {
 
     private WeightedDriver getWeightedDriverForDriverName(final String driverName) {
         // Check for valid key before accepting
-        final int driverPosition = driverList.indexOf(new WeightedDriver(driverName, 0));
+        final int driverPosition = this.driverList.indexOf(new WeightedDriver(driverName, 0));
         if (driverPosition >= 0) {
-            return driverList.get(driverPosition);
+            return this.driverList.get(driverPosition);
         }
         return null;
     }
