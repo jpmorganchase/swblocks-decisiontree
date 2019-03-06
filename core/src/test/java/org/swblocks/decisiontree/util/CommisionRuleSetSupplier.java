@@ -300,23 +300,6 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
                 .with(RuleBuilder::output, Collections.singletonMap("Rate", rate)));
     }
 
-    public static Builder<RuleSetBuilder, DecisionTreeRuleSet> addEvaluationRule(
-            final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder,
-            final String exmethod, final String exchange,
-            final String product, final String region,
-            final String asset, final String evaluation,
-            final Instant start,
-            final Instant finish, final long ruleId, final String rate) {
-        return ruleSetBuilder.with(RuleSetBuilder::rule, RuleBuilder.creator()
-                .with(RuleBuilder::input, Arrays.asList(exmethod, exchange, product, region, asset))
-                .with(RuleBuilder::evaluations, Collections.singletonList(evaluation))
-                .with(RuleBuilder::start, start)
-                .with(RuleBuilder::end, finish)
-                .with(RuleBuilder::setId, new UUID(0L, ruleId))
-                .with(RuleBuilder::setCode, new UUID(0L, ruleId))
-                .with(RuleBuilder::output, Collections.singletonMap("Rate", rate)));
-    }
-
     /**
      * Helper method to add a Commission Rule to the Commission ruleset with a notional range.
      */
@@ -329,6 +312,26 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
             final Instant finish, final long ruleId, final String rate) {
         return ruleSetBuilder.with(RuleSetBuilder::rule, RuleBuilder.creator()
                 .with(RuleBuilder::input, Arrays.asList(exmethod, exchange, product, region, asset, notionalRange))
+                .with(RuleBuilder::start, start)
+                .with(RuleBuilder::end, finish)
+                .with(RuleBuilder::setId, new UUID(0L, ruleId))
+                .with(RuleBuilder::setCode, new UUID(0L, ruleId))
+                .with(RuleBuilder::output, Collections.singletonMap("Rate", rate)));
+    }
+
+    /**
+     * Helper method to add a Commission Rule to the Commission ruleset with an evaluation part of the rule.
+     */
+    public static Builder<RuleSetBuilder, DecisionTreeRuleSet> addEvaluationRule(
+            final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder,
+            final String exmethod, final String exchange,
+            final String product, final String region,
+            final String asset, final String evaluation,
+            final Instant start,
+            final Instant finish, final long ruleId, final String rate) {
+        return ruleSetBuilder.with(RuleSetBuilder::rule, RuleBuilder.creator()
+                .with(RuleBuilder::input, Arrays.asList(exmethod, exchange, product, region, asset))
+                .with(RuleBuilder::evaluations, Collections.singletonList(evaluation))
                 .with(RuleBuilder::start, start)
                 .with(RuleBuilder::end, finish)
                 .with(RuleBuilder::setId, new UUID(0L, ruleId))

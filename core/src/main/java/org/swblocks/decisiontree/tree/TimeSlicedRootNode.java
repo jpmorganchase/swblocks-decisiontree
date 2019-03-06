@@ -55,7 +55,7 @@ public final class TimeSlicedRootNode implements TreeNode {
     List<Instant> getTimes() {
         final Set<Instant> times = new TreeSet<>();
 
-        ruleSet.getRules().forEach((ruleId, rule) -> {
+        this.ruleSet.getRules().forEach((ruleId, rule) -> {
             times.add(rule.getStart());
             times.add(rule.getEnd());
         });
