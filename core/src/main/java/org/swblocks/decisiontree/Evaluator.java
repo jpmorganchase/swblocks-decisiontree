@@ -76,7 +76,7 @@ public final class Evaluator {
     public static List<UUID> evaluate(final List<String> searchInputs, final Instant time,
                                       final List<String> evaluationInputs,
                                       final TreeNode rootNode) {
-        List<EvaluationResult> results = evaluateAllResults(searchInputs, time, rootNode);
+        final List<EvaluationResult> results = evaluateAllResults(searchInputs, time, rootNode);
 
         if (results.isEmpty()) {
             return Collections.emptyList();
@@ -97,15 +97,15 @@ public final class Evaluator {
                 evaluatedResults.add(id);
             }
         }
-        results = evaluatedResults;
-        if (results.isEmpty()) {
+
+        if (evaluatedResults.isEmpty()) {
             return Collections.emptyList();
-        } else if (results.size() == 1) {
-            return Collections.singletonList(results.get(0).getRuleIdentifier());
+        } else if (evaluatedResults.size() == 1) {
+            return Collections.singletonList(evaluatedResults.get(0).getRuleIdentifier());
         }
-        final List<UUID> bestResults = new ArrayList<>(results.size());
-        EvaluationResult bestNode = results.get(0);
-        for (final EvaluationResult result : results) {
+        final List<UUID> bestResults = new ArrayList<>(evaluatedResults.size());
+        EvaluationResult bestNode = evaluatedResults.get(0);
+        for (final EvaluationResult result : evaluatedResults) {
             if (result.getWeight() > bestNode.getWeight()) {
                 bestResults.clear();
                 bestNode = result;
