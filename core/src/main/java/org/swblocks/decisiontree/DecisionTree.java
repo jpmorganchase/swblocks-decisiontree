@@ -163,7 +163,7 @@ public class DecisionTree {
     public List<OutputResults> getEvaluationsFor(final Input input) {
         final List<UUID> result = Evaluator.evaluate(input.getEvaluationInputs(), input.getEvaluationDate(),
                 new ArrayList<>(input.getEvaluationMap().values()), node);
-        return result.stream().map(uuid ->
+        return result.stream().distinct().map(uuid ->
                 new OutputResults(ruleSet.getRules().get(uuid))).collect(Collectors.toList());
     }
 

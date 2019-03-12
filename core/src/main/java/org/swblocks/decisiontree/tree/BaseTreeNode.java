@@ -27,8 +27,6 @@ import java.util.stream.Stream;
 
 import org.swblocks.jbl.util.Range;
 
-import static java.util.Collections.emptyList;
-
 /**
  * Single tree tree node that can be created within the tree and sub-classed for specialised behaviour.
  *
@@ -49,35 +47,35 @@ class BaseTreeNode implements TreeNode {
     public BaseTreeNode(final InputDriver driver, final int driverLevel) {
         this.driver = driver;
         this.driverLevel = driverLevel;
-        this.failureNode = Optional.empty();
+        failureNode = Optional.empty();
     }
 
     @Override
     public String getValue() {
-        return this.driver.getValue();
+        return driver.getValue();
     }
 
     @Override
     public Stream<TreeNode> stream() {
-        return this.nextNodes.values().stream();
+        return nextNodes.values().stream();
     }
 
     @Override
     public void optimise() {
-        if (this.nextNodes.size() == 1) {
+        if (nextNodes.size() == 1) {
             final Map<Object, TreeNode> nodes = new HashMap<>(1, 1L);
-            nodes.putAll(this.nextNodes);
-            this.nextNodes = nodes;
+            nodes.putAll(nextNodes);
+            nextNodes = nodes;
         }
 
-        for (final TreeNode node : this.nextNodes.values()) {
+        for (final TreeNode node : nextNodes.values()) {
             node.optimise();
         }
     }
 
     @Override
     public boolean evaluate(final String input) {
-        return this.driver.evaluate(input);
+        return driver.evaluate(input);
     }
 
     @Override
@@ -87,23 +85,33 @@ class BaseTreeNode implements TreeNode {
 
     @Override
     public List<TreeNode> getEvaluatedNodes(final List<String> inputs, final Instant time) {
-        final String value = inputs.get(this.driverLevel);
+        return getEvaluatedNodes(inputs, time, false);
+    }
+
+    @Override
+    public List<TreeNode> getEvaluatedNodesWithWildcards(final List<String> inputs, final Instant time) {
+        return getEvaluatedNodes(inputs, time, true);
+    }
+
+    private List<TreeNode> getEvaluatedNodes(final List<String> inputs, final Instant time, final boolean includeWildcards) {
+        final String value = inputs.get(driverLevel);
         final List<TreeNode> nodes = getEvaluatedNodes(value);
+        final List<TreeNode> results = new ArrayList<>(nodes.size() + 1);
         if (!nodes.isEmpty()) {
-            return nodes;
+            results.addAll(nodes);
         }
 
-        if (this.failureNode.isPresent()) {
-            return Collections.singletonList(getFailureNode().get());
+        if (failureNode.isPresent() && (includeWildcards || results.isEmpty())) {
+            results.add(getFailureNode().get());
         }
 
-        return emptyList();
+        return results;
     }
 
     private List<TreeNode> getEvaluatedNodes(final String input) {
-        final Optional<TreeNode> matches = Optional.ofNullable(this.nextNodes.get(input));
+        final Optional<TreeNode> matches = Optional.ofNullable(nextNodes.get(input));
 
-        if (matches.isPresent() && this.isDeterministic()) {
+        if (matches.isPresent() && isDeterministic()) {
             return Collections.singletonList(matches.get());
         }
 
@@ -116,7 +124,7 @@ class BaseTreeNode implements TreeNode {
             }
         }
 
-        for (final TreeNode node : this.nextNodes.values()) {
+        for (final TreeNode node : nextNodes.values()) {
             if (node.getDriverType() != InputValueType.STRING && node.getDriver().evaluate(input)) {
                 results.add(node);
             }
@@ -133,23 +141,23 @@ class BaseTreeNode implements TreeNode {
      */
     void calculateFailureNode(final Optional<TreeNode> currentFailureNode) {
         final Optional<TreeNode> wildCardNode =
-                Optional.ofNullable(this.nextNodes.get(InputValueType.WILDCARD));
+                Optional.ofNullable(nextNodes.get(InputValueType.WILDCARD));
         if (wildCardNode.isPresent()) {
             ((BaseTreeNode) wildCardNode.get()).calculateFailureNode(currentFailureNode);
-            this.failureNode = wildCardNode;
+            failureNode = wildCardNode;
         } else {
-            this.failureNode = currentFailureNode;
+            failureNode = currentFailureNode;
         }
 
-        for (final TreeNode node : this.nextNodes.values()) {
+        for (final TreeNode node : nextNodes.values()) {
             if (!InputValueType.WILDCARD.equals(node.getValue())) {
-                ((BaseTreeNode) node).calculateFailureNode(this.failureNode);
+                ((BaseTreeNode) node).calculateFailureNode(failureNode);
             }
         }
     }
 
     Optional<TreeNode> getFailureNode() {
-        return this.failureNode;
+        return failureNode;
     }
 
     @Override
@@ -159,37 +167,37 @@ class BaseTreeNode implements TreeNode {
 
     @Override
     public InputDriver getDriver() {
-        return this.driver;
+        return driver;
     }
 
     @Override
     public Optional<TreeNode> getExactNode(final TreeNode inputValue) {
-        return Optional.ofNullable(this.nextNodes.get(inputValue.getValue()));
+        return Optional.ofNullable(nextNodes.get(inputValue.getValue()));
     }
 
     int getDriverLevel() {
-        return this.driverLevel;
+        return driverLevel;
     }
 
     public boolean isDeterministic() {
-        return this.isDeterministic;
+        return isDeterministic;
     }
 
     public void setDeterministic(final boolean deterministic) {
-        this.isDeterministic = deterministic;
+        isDeterministic = deterministic;
     }
 
     @Override
     public TreeNode addNode(final TreeNode newNode) {
         if (newNode.getDriverType() != InputValueType.STRING) {
-            this.setDeterministic(false);
+            setDeterministic(false);
         }
 
         final Optional<TreeNode> node = getExactNode(newNode);
         if (node.isPresent()) {
             return node.get();
         } else {
-            this.nextNodes.put(newNode.getValue(), newNode);
+            nextNodes.put(newNode.getValue(), newNode);
         }
 
         return newNode;
@@ -200,15 +208,15 @@ class BaseTreeNode implements TreeNode {
         if (this == other) {
             return true;
         }
-        if (other == null || this.getClass() != other.getClass()) {
+        if (other == null || getClass() != other.getClass()) {
             return false;
         }
 
-        return this.driver.equals(((BaseTreeNode) other).getDriver());
+        return driver.equals(((BaseTreeNode) other).getDriver());
     }
 
     @Override
     public int hashCode() {
-        return this.driver.getValue().hashCode();
+        return driver.getValue().hashCode();
     }
 }

@@ -52,7 +52,8 @@ public interface TreeNode {
 
     /**
      * Returns a list of {@code TreeNode} under this node which evaluates true given the input list of data and specific
-     * point in time. The node knows which driver position is represents in the list of input data to evaluate against.
+     * point in time. Will not include wildcards if there is any other match.
+     * The node knows which driver position is represents in the list of input data to evaluate against.
      *
      * <p>Used for evaluation of the tree.  The tree evaluation can jump between nodes during evaluation
      *
@@ -61,6 +62,19 @@ public interface TreeNode {
      * @return {@link List} TreeNode, populated if found.
      */
     List<TreeNode> getEvaluatedNodes(final List<String> inputs, final Instant time);
+
+    /**
+     * Returns a list of {@code TreeNode} under this node which evaluates true given the input list of data and specific
+     * point in time. Includes full and wildcard matches. The node knows which driver position is represents in the list
+     * of input data to evaluate against.
+     *
+     * <p>Used for evaluation of the tree.  The tree evaluation can jump between nodes during evaluation
+     *
+     * @param inputs input list to evaluate.
+     * @param time   the point in time at which evaluation takes place.
+     * @return {@link List} TreeNode, populated if found.
+     */
+    List<TreeNode> getEvaluatedNodesWithWildcards(final List<String> inputs, final Instant time);
 
     /**
      * Returns the {@code TreeNode} under this node which equals the {code TreeNode} passed in.

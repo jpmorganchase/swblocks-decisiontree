@@ -120,6 +120,15 @@ public final class TimeSlicedRootNode implements TreeNode {
         return rootSlicedNode.get().getEvaluatedNodes(inputs, time);
     }
 
+    @Override
+    public List<TreeNode> getEvaluatedNodesWithWildcards(final List<String> inputs, final Instant time) {
+        EhSupport.ensureArg(time != null, "Time sliced decision tree has %s time", time);
+
+        final Optional<TreeNode> rootSlicedNode = getTreeNodeForTime(time);
+        EhSupport.ensure(rootSlicedNode.isPresent(), "No slice node found");
+        return rootSlicedNode.get().getEvaluatedNodesWithWildcards(inputs, time);
+    }
+
     /**
      * Gets the {@code DecisionTreeType.SINGLE} decision tree for the time given.
      *

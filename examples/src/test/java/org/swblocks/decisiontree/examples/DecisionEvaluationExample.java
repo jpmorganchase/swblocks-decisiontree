@@ -51,7 +51,7 @@ public class DecisionEvaluationExample {
                 .with(RuleBuilder::output, Collections.singletonMap("Result", "lowcoverage")));
 
         builder.with(RuleSetBuilder::rule, RuleBuilder.creator()
-                .with(RuleBuilder::input, Arrays.asList("ACME", "*", "*"))
+                .with(RuleBuilder::input, Arrays.asList("RE:ACME", "*", "*"))
                 .with(RuleBuilder::evaluations, Collections.singletonList("IR:70|100"))
                 .with(RuleBuilder::output, Collections.singletonMap("Result", "highcoverage")));
     }
