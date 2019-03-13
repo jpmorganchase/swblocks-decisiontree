@@ -88,7 +88,7 @@ public final class Evaluator {
         final List<EvaluationResult> evaluatedResults = new ArrayList<>(results.size());
         for (final EvaluationResult id : results) {
             final Optional<InputDriver[]> evaluations = id.getEvaluations();
-            if (evaluations.isPresent()) {
+            if (evaluations.isPresent() && !evaluationInputs.isEmpty()) {
                 for (int i = 0; i < evaluations.get().length; i++) {
                     final InputDriver driver = evaluations.get()[i];
                     final boolean evaluate = driver.evaluate(evaluationInputs.get(i));

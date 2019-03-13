@@ -18,15 +18,22 @@ package org.swblocks.decisiontree;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Test;
 import org.swblocks.decisiontree.domain.DecisionTreeRuleSet;
+import org.swblocks.decisiontree.domain.builders.RuleBuilder;
+import org.swblocks.decisiontree.domain.builders.RuleSetBuilder;
 import org.swblocks.decisiontree.tree.DecisionTreeType;
 import org.swblocks.decisiontree.util.CommisionRuleSetSupplier;
+import org.swblocks.jbl.builders.Builder;
+import org.swblocks.jbl.collections.CollectionUtils;
 import org.swblocks.jbl.eh.Result;
 
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -284,6 +291,46 @@ public class DecisionTreeTest {
         results = decisionTree.getSingleEvaluationFor(input);
         assertTrue(results.isPresent());
         assertEquals("1.1", results.get().results().get("Rate"));
+    }
+
+    @Test
+    public void evaluationDecisionTreeEvaluation() {
+        final DecisionTree decisionTree = DecisionTree.instanceOf(
+                new Loader<DecisionTreeRuleSet>() {
+                    @Override
+                    public boolean test(final Result result) {
+                        return false;
+                    }
+
+                    @Override
+                    public Result<DecisionTreeRuleSet> get() {
+                        final Builder<RuleSetBuilder, DecisionTreeRuleSet> commissionRuleSet =
+                                CommisionRuleSetSupplier.getCommisionRuleSet();
+                        commissionRuleSet.with(RuleSetBuilder::rule, RuleBuilder.creator()
+                                .with(RuleBuilder::input, Arrays.asList("VOICE", "LME", "FE", "UK", "METAL"))
+                                .with(RuleBuilder::evaluations, Collections.singletonList("IR:50|100"))
+                                .with(RuleBuilder::setId, new UUID(0L, 6))
+                                .with(RuleBuilder::setCode, new UUID(0L, 6))
+                                .with(RuleBuilder::output, Collections.singletonMap("Rate", "1.6")));
+                        return Result.success(commissionRuleSet.build());
+                    }
+                },
+                DecisionTreeType.SINGLE);
+
+        assertNotNull(decisionTree);
+
+        Input input = decisionTree.createInputs(Collections.singletonMap("FEE", "55"),
+                "VOICE", "LME", "FE", "UK", "METAL");
+        List<OutputResults> results = decisionTree.getEvaluationsFor(input);
+        assertTrue(CollectionUtils.isNotEmpty(results));
+        assertEquals("1.6", results.get(0).results().get("Rate"));
+
+        // Fee set to 5, blocks Rule 6, defaults down to wildcard rule 5
+        input = decisionTree.createInputs(Collections.singletonMap("FEE", "5"),
+                "VOICE", "LME", "FE", "UK", "METAL");
+        results = decisionTree.getEvaluationsFor(input);
+        assertTrue(CollectionUtils.isNotEmpty(results));
+        assertEquals("1.1", results.get(0).results().get("Rate"));
     }
 
     @Test

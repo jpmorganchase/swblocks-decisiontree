@@ -68,6 +68,7 @@ public class DecisionEvaluationExample {
         final Input input = decisionTree.createInputs(Collections.singletonMap("UTC", "55"), "ACME", "Games", "Video");
         final List<OutputResults> evaluationFor = decisionTree.getEvaluationsFor(input);
         evaluationFor.forEach((output)->logResult(input, Optional.ofNullable(output)));
+
     }
 
     private void logResult(final Input input, final Optional<OutputResults> evaluationFor) {

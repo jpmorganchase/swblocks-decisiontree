@@ -125,5 +125,6 @@ public interface TreeNode {
      */
     Range<Instant> getDateRange();
 
-    default void setDateRange(Range<Instant> dateRange){}
+    default void setDateRange(final Range<Instant> dateRange) {
+    }
 }
