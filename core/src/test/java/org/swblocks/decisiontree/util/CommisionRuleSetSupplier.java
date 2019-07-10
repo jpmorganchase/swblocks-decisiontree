@@ -83,6 +83,29 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
         return ruleSetBuilder;
     }
 
+
+    /**
+     * Creates the basic Commission ruleset with additional regex rules.
+     */
+    public static Builder<RuleSetBuilder, DecisionTreeRuleSet> getCommissionRuleSetWithExtraEvaluations() {
+        final UUID id = new UUID(0, 1);
+        final Set<ValueGroup> groups = Collections.singleton(new ValueGroup(id, "CMEGroup",
+                Arrays.asList("CME", "CBOT"), ValueGroup.DEFAULT_DATE_RANGE));
+
+        final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder = RuleSetBuilder.creator("commissions",
+                Arrays.asList("EXMETHOD", "EXCHANGE", "PRODUCT", "REGION", "ASSET"));
+        ruleSetBuilder.with(RuleSetBuilder::setEvaluationNames, Arrays.asList("NOTIONAL"));
+        ruleSetBuilder.with(RuleSetBuilder::groups, groups);
+        addRule(ruleSetBuilder, "*", GroupDriver.VG_PREFIX + id, "*", "*", "INDEX", null, null, 0, "1.1");
+        addRule(ruleSetBuilder, "*", "CME", "S&P", "*", "INDEX", null, null, 1, "1.2");
+        addRule(ruleSetBuilder, "VOICE", "CME", "ED", "*", "RATE", null, null, 2, "1.4");
+        addRule(ruleSetBuilder, "VOICE", "*", "*", "US", "*", null, null, 3, "1.5");
+        addRule(ruleSetBuilder, "*", "*", "*", "US", "*", null, null, 4, "1.2");
+        addRule(ruleSetBuilder, "*", "*", "*", "UK", "*", null, null, 5, "1.1");
+        addEvaluationRule(ruleSetBuilder, "VOICE", "CME", "NDK", "APAC", "INDEX", "IR:0|1000", null, null, 6, "1.1");
+        return ruleSetBuilder;
+    }
+
     /**
      * Creates a dated Commission ruleset for testing dated evaluations.
      *
@@ -289,6 +312,26 @@ public class CommisionRuleSetSupplier implements Loader<DecisionTreeRuleSet> {
             final Instant finish, final long ruleId, final String rate) {
         return ruleSetBuilder.with(RuleSetBuilder::rule, RuleBuilder.creator()
                 .with(RuleBuilder::input, Arrays.asList(exmethod, exchange, product, region, asset, notionalRange))
+                .with(RuleBuilder::start, start)
+                .with(RuleBuilder::end, finish)
+                .with(RuleBuilder::setId, new UUID(0L, ruleId))
+                .with(RuleBuilder::setCode, new UUID(0L, ruleId))
+                .with(RuleBuilder::output, Collections.singletonMap("Rate", rate)));
+    }
+
+    /**
+     * Helper method to add a Commission Rule to the Commission ruleset with an evaluation part of the rule.
+     */
+    public static Builder<RuleSetBuilder, DecisionTreeRuleSet> addEvaluationRule(
+            final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder,
+            final String exmethod, final String exchange,
+            final String product, final String region,
+            final String asset, final String evaluation,
+            final Instant start,
+            final Instant finish, final long ruleId, final String rate) {
+        return ruleSetBuilder.with(RuleSetBuilder::rule, RuleBuilder.creator()
+                .with(RuleBuilder::input, Arrays.asList(exmethod, exchange, product, region, asset))
+                .with(RuleBuilder::evaluations, Collections.singletonList(evaluation))
                 .with(RuleBuilder::start, start)
                 .with(RuleBuilder::end, finish)
                 .with(RuleBuilder::setId, new UUID(0L, ruleId))

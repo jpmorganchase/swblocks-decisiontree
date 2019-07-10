@@ -60,7 +60,8 @@ public class ValueGroupRangeChangeBuilderTest {
         final Set<ValueGroup> valueGroups = Collections.singleton(
                 new ValueGroup(id, "TestValueGroup", drivers, range));
 
-        final DecisionTreeRuleSet ruleSet = new DecisionTreeRuleSet("TestRuleSet", Collections.emptyMap(), Collections.emptyList(),
+        final DecisionTreeRuleSet ruleSet = new DecisionTreeRuleSet("TestRuleSet", Collections.emptyMap(),
+                Collections.emptyList(), Collections.emptyList(),
                 new DriverCache(), valueGroups);
 
         builder = ValueGroupChangeBuilder.creator("TestValueGroup");

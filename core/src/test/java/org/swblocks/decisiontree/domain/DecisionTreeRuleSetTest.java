@@ -70,8 +70,35 @@ public class DecisionTreeRuleSetTest {
                 Collections.singletonMap(uuid, testRule), driverNames);
         assertEquals("TestName", ruleSet.getName());
         assertEquals(1, ruleSet.getRules().size());
+        assertEquals(Collections.emptyList(), ruleSet.getEvaluationNames());
         assertEquals(uuid, ruleSet.getRules().get(uuid).getRuleIdentifier());
         assertEquals(driverNames, ruleSet.getDriverNames());
+        assertEquals(weightedDriverResults, ruleSet.getWeightedDrivers());
+        assertEquals("DecisionTreeRuleSet{name='TestName'}", ruleSet.toString());
+    }
+
+    @Test
+    public void testConstructionWithEvaluation() {
+        final Instant startInstance = Instant.now();
+        final Instant endInstance = startInstance.plus(1, ChronoUnit.DAYS);
+
+        final UUID uuid = new UUID(0, 1);
+        final DecisionTreeRule testRule = new DecisionTreeRule(uuid, UUID.randomUUID(), getInputDriverArray(),
+                Collections.singletonMap("outputDriver", "result"), startInstance, endInstance);
+
+        final List<String> driverNames = Arrays.asList("driver1", "driver2");
+        final List<WeightedDriver> weightedDriverResults = Arrays.asList(new WeightedDriver("driver1", 4),
+                new WeightedDriver("driver2", 2));
+        final List<String> evaluationNames = Arrays.asList("Eval1", "eval2");
+
+        final DecisionTreeRuleSet ruleSet = new DecisionTreeRuleSet("TestName",
+                Collections.singletonMap(uuid, testRule), driverNames, evaluationNames);
+        assertEquals("TestName", ruleSet.getName());
+        assertEquals(1, ruleSet.getRules().size());
+        assertEquals(evaluationNames, ruleSet.getEvaluationNames());
+        assertEquals(uuid, ruleSet.getRules().get(uuid).getRuleIdentifier());
+        assertEquals(driverNames, ruleSet.getDriverNames());
+        assertEquals(evaluationNames, ruleSet.getEvaluationNames());
         assertEquals(weightedDriverResults, ruleSet.getWeightedDrivers());
         assertEquals("DecisionTreeRuleSet{name='TestName'}", ruleSet.toString());
     }
@@ -83,7 +110,7 @@ public class DecisionTreeRuleSetTest {
         assertEquals(ruleSet, ruleSet);
         assertEquals(new DecisionTreeRuleSet("TestName", null, driverNames), ruleSet);
         assertNotEquals(new DecisionTreeRuleSet("NotTestName", null, driverNames), ruleSet);
-        assertNotEquals(Integer.valueOf(1), ruleSet);
+        assertNotEquals(1, ruleSet);
         assertNotEquals(ruleSet, null);
         assertEquals(new DecisionTreeRuleSet("TestName", null, driverNames).hashCode(), ruleSet.hashCode());
         assertNotEquals(new DecisionTreeRuleSet("NotTestName", null, driverNames).hashCode(), ruleSet.hashCode());
@@ -122,6 +149,12 @@ public class DecisionTreeRuleSetTest {
     public void testingImmutableDrivers() {
         final DecisionTreeRuleSet commisssionRuleSet = CommisionRuleSetSupplier.getCommissionRuleSetWithRegex().build();
         commisssionRuleSet.getDriverNames().clear();
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testingImmutableEvaluationNames() {
+        final DecisionTreeRuleSet commisssionRuleSet = CommisionRuleSetSupplier.getCommissionRuleSetWithRegex().build();
+        commisssionRuleSet.getEvaluationNames().clear();
     }
 
     @Test

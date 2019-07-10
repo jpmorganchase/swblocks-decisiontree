@@ -44,6 +44,7 @@ public final class DecisionTreeRuleSet {
     private final String name;
     private final Map<UUID, DecisionTreeRule> rules;
     private final List<WeightedDriver> driverNames;
+    private final List<String> evaluationNames;
     private final DriverCache cache;
     private final Map<UUID, ValueGroup> groups;
 
@@ -60,7 +61,24 @@ public final class DecisionTreeRuleSet {
      */
     DecisionTreeRuleSet(final String name, final Map<UUID, DecisionTreeRule> rules,
                         final List<String> driverNames) {
-        this(name, rules, driverNames, new DriverCache(), null);
+        this(name, rules, driverNames, Collections.emptyList(), new DriverCache(), null);
+    }
+
+    /**
+     * Constructor to build the Ruleset taking the rules. The rules are passed as a map with the ID and {@link
+     * DecisionTreeRule}.
+     *
+     * <p>This constructor initialises a {@link DriverCache} and a {@link ValueGroup} set. This constructor should only
+     * be used in the case of a simple rule set which does not contain any value groups.
+     *
+     * @param name            Name of the RuleSet
+     * @param rules           Map of rules in the RuleSet
+     * @param driverNames     List of driver names in weighted order, highest first
+     * @param evaluationNames List of evaluation names used in the RuleSet
+     */
+    DecisionTreeRuleSet(final String name, final Map<UUID, DecisionTreeRule> rules,
+                        final List<String> driverNames, final List<String> evaluationNames) {
+        this(name, rules, driverNames, evaluationNames, new DriverCache(), null);
     }
 
     /**
@@ -70,19 +88,22 @@ public final class DecisionTreeRuleSet {
      * @param name        Name of the RuleSet
      * @param rules       Map of rules in the RuleSet
      * @param driverNames List of driver names in weighted order, highest first
+     * @param evaluationNames List of evaluation names used in the RuleSet
      * @param cache       Cache of {@link InputDriver} used within the {@link DecisionTreeRuleSet}
      * @param valueGroups the collection of {@link ValueGroup}
      */
     public DecisionTreeRuleSet(final String name,
                                final Map<UUID, DecisionTreeRule> rules,
                                final List<String> driverNames,
+                               final List<String> evaluationNames,
                                final DriverCache cache,
                                final Set<ValueGroup> valueGroups) {
         this.name = name;
         this.rules = rules;
         this.driverNames = convertNamesToWeightedDrivers(driverNames);
+        this.evaluationNames = evaluationNames;
         this.cache = cache;
-        this.groups = valueGroups == null ? new ConcurrentHashMap() :
+        groups = valueGroups == null ? new ConcurrentHashMap() :
                 valueGroups.stream().collect(Collectors.toMap(ValueGroup::getId, vg -> vg));
     }
 
@@ -103,11 +124,11 @@ public final class DecisionTreeRuleSet {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public Map<UUID, DecisionTreeRule> getRules() {
-        return Collections.unmodifiableMap(this.rules);
+        return Collections.unmodifiableMap(rules);
     }
 
     /**
@@ -117,25 +138,25 @@ public final class DecisionTreeRuleSet {
      */
     void updateRules(final TreeChange change) {
         // Update Cache
-        RuleSetBuilder.addValueGroupsToDriverCache(this.cache,
+        RuleSetBuilder.addValueGroupsToDriverCache(cache,
                 change.getGroups().values().stream().filter(Optional::isPresent).map(Optional::get)
                         .map(ValueGroup.class::cast).collect(Collectors.toList()));
 
         for (final Map.Entry<UUID, Optional<TreeValueGroup>> decisionTreeGroupEntry : change.getGroups().entrySet()) {
             if (!decisionTreeGroupEntry.getValue().isPresent()) {
-                this.groups.remove(decisionTreeGroupEntry.getKey());
+                groups.remove(decisionTreeGroupEntry.getKey());
             } else {
-                this.groups.put(decisionTreeGroupEntry.getKey(), (ValueGroup) decisionTreeGroupEntry.getValue().get());
+                groups.put(decisionTreeGroupEntry.getKey(), (ValueGroup) decisionTreeGroupEntry.getValue().get());
             }
         }
 
         for (final Map.Entry<UUID, Optional<TreeRule>> decisionTreeRuleEntry : change.getRules().entrySet()) {
             if (!decisionTreeRuleEntry.getValue().isPresent()) {
-                this.rules.remove(decisionTreeRuleEntry.getKey());
+                rules.remove(decisionTreeRuleEntry.getKey());
             } else {
                 final DecisionTreeRule newRule = (DecisionTreeRule) decisionTreeRuleEntry.getValue().get();
-                newRule.replaceDriversFromCache(this.cache);
-                this.rules.put(decisionTreeRuleEntry.getKey(), newRule);
+                newRule.replaceDriversFromCache(cache);
+                rules.put(decisionTreeRuleEntry.getKey(), newRule);
             }
         }
     }
@@ -146,8 +167,17 @@ public final class DecisionTreeRuleSet {
      * @return List of {@code String} names of the drivers.
      */
     public List<String> getDriverNames() {
-        return this.driverNames.stream().map(WeightedDriver::getName)
+        return driverNames.stream().map(WeightedDriver::getName)
                 .collect(collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
+    }
+
+    /**
+     * Returns an {@code Collections.unmodifiableList} of evaluation names.
+     *
+     * @return List of {@code String} names of the possible evaluations
+     */
+    public List<String> getEvaluationNames() {
+        return Collections.unmodifiableList(evaluationNames);
     }
 
     /**
@@ -156,7 +186,7 @@ public final class DecisionTreeRuleSet {
      * @return Immutable list of weighted drivers.
      */
     public List<WeightedDriver> getWeightedDrivers() {
-        return Collections.unmodifiableList(this.driverNames);
+        return Collections.unmodifiableList(driverNames);
     }
 
     /**
@@ -166,7 +196,7 @@ public final class DecisionTreeRuleSet {
      * @return List of matching {@link InputDriver}
      */
     public List<InputDriver> getDriversByType(final InputValueType type) {
-        return this.cache.findByInputDriverType(type);
+        return cache.findByInputDriverType(type);
     }
 
     /**
@@ -175,12 +205,12 @@ public final class DecisionTreeRuleSet {
      * @return the collection of value groups
      */
     public Set<ValueGroup> getValueGroups() {
-        return this.groups.values().stream()
+        return groups.values().stream()
                 .collect(collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
     }
 
     public DriverCache getDriverCache() {
-        return this.cache;
+        return cache;
     }
 
     @Override
@@ -192,16 +222,17 @@ public final class DecisionTreeRuleSet {
             return false;
         }
         final DecisionTreeRuleSet ruleSet = (DecisionTreeRuleSet) other;
-        return Objects.equals(this.name, ruleSet.name);
+        return Objects.equals(name, ruleSet.name);
     }
 
     @Override
     public int hashCode() {
-        return this.name.hashCode();
+        return name.hashCode();
     }
 
     @Override
     public String toString() {
-        return "DecisionTreeRuleSet{name='" + this.name + "'}";
+        return "DecisionTreeRuleSet{name='" + name + "'}";
     }
+
 }

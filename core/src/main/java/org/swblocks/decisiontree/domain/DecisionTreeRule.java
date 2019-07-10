@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.swblocks.decisiontree.TreeRule;
@@ -47,9 +48,33 @@ public final class DecisionTreeRule implements TreeRule {
     private final UUID ruleIdentifier;
     private final UUID ruleCode;
     private final InputDriver[] drivers;
+    private final InputDriver[] evaluations;
     private final Map<String, String> outputs;
     private final Instant start;
     private final Instant end;
+
+    /**
+     * Constructor to create a fully formed DecisionTreeRule object.
+     *
+     * @param ruleIdentifier Unique identifier of the rule
+     * @param ruleCode       Unique identifier of the same rule with different version
+     * @param drivers        Array of {@link InputDriver} defining the input drivers in weighted order
+     * @param evaluations    Array of {@link InputDriver} defining the input drivers evaluated
+     * @param outputs        Map of name/value pairs of strings defining the output of the rule
+     * @param start          Start time of the rule, defaults to {@code DecisionTreeRule.EPOCH} if null
+     * @param end            End time of the rule, defaults to {@code DecisionTreeRule.MAX} if null
+     */
+    public DecisionTreeRule(final UUID ruleIdentifier, final UUID ruleCode, final InputDriver[] drivers,
+                            final InputDriver[] evaluations, final Map<String, String> outputs,
+                            final Instant start, final Instant end) {
+        this.ruleIdentifier = ruleIdentifier;
+        this.ruleCode = ruleCode;
+        this.drivers = drivers;
+        this.evaluations = evaluations;
+        this.outputs = outputs;
+        this.start = ofNullable(start).orElse(DecisionTreeRule.EPOCH);
+        this.end = ofNullable(end).orElse(DecisionTreeRule.MAX);
+    }
 
     /**
      * Constructor to create a fully formed DecisionTreeRule object.
@@ -63,12 +88,7 @@ public final class DecisionTreeRule implements TreeRule {
      */
     public DecisionTreeRule(final UUID ruleIdentifier, final UUID ruleCode, final InputDriver[] drivers,
                             final Map<String, String> outputs, final Instant start, final Instant end) {
-        this.ruleIdentifier = ruleIdentifier;
-        this.ruleCode = ruleCode;
-        this.drivers = drivers;
-        this.outputs = outputs;
-        this.start = ofNullable(start).orElse(DecisionTreeRule.EPOCH);
-        this.end = ofNullable(end).orElse(DecisionTreeRule.MAX);
+        this(ruleIdentifier, ruleCode, drivers, null, outputs, start, end);
     }
 
     /**
@@ -89,7 +109,7 @@ public final class DecisionTreeRule implements TreeRule {
      */
     @Override
     public UUID getRuleIdentifier() {
-        return this.ruleIdentifier;
+        return ruleIdentifier;
     }
 
     /**
@@ -100,7 +120,21 @@ public final class DecisionTreeRule implements TreeRule {
      */
     @Override
     public InputDriver[] getDrivers() {
-        return this.drivers;
+        return drivers;
+    }
+
+    /**
+     * Returns an array of the drivers for the rule to be evaluated on the outputs.
+     *
+     * @return Optional of the Array of input drivers
+     * @see TreeRule#getEvaluations()
+     */
+    @Override
+    public Optional<InputDriver[]> getEvaluations() {
+        if (evaluations == null || evaluations.length == 0) {
+            return Optional.empty();
+        }
+        return Optional.of(evaluations);
     }
 
     /**
@@ -111,12 +145,12 @@ public final class DecisionTreeRule implements TreeRule {
      */
     @Override
     public Map<String, String> getOutputs() {
-        return Collections.unmodifiableMap(this.outputs);
+        return Collections.unmodifiableMap(outputs);
     }
 
     @Override
     public DateRange getRange() {
-        return new DateRange(this.start, this.end);
+        return new DateRange(start, end);
     }
 
     /**
@@ -125,7 +159,7 @@ public final class DecisionTreeRule implements TreeRule {
      * @return Instant
      */
     public Instant getStart() {
-        return this.start;
+        return start;
     }
 
     /**
@@ -134,7 +168,7 @@ public final class DecisionTreeRule implements TreeRule {
      * @return Instant
      */
     public Instant getEnd() {
-        return this.end;
+        return end;
     }
 
     /**
@@ -144,7 +178,14 @@ public final class DecisionTreeRule implements TreeRule {
      * @return true if the inputs, outputs and date ranges from the other {@code DecisionTreeRule} are identical.
      */
     public boolean isDuplicateRule(final DecisionTreeRule other) {
-        return other != null && isDuplicateInputData(other) && isDuplicateOutputData(other) &&
+        if (other == null) {
+            return false;
+        }
+        if (evaluations != null || other.evaluations != null) {
+            return isDuplicateInputData(other) && isDuplicateOutputData(other) &&
+                    isDuplicateDateRange(other) && isDuplicateEvaluations(other);
+        }
+        return isDuplicateInputData(other) && isDuplicateOutputData(other) &&
                 isDuplicateDateRange(other);
     }
 
@@ -156,12 +197,34 @@ public final class DecisionTreeRule implements TreeRule {
      * @return true if the inputs from the other {@code DecisionTreeRule} are identical.
      */
     public boolean isDuplicateInputData(final DecisionTreeRule other) {
-        if (other == null || this.drivers.length != other.drivers.length) {
+        if (other == null || drivers.length != other.drivers.length) {
             return false;
         }
-        for (int i = 0; i < this.drivers.length; i++) {
-            final InputDriver thisValue = this.drivers[i];
+        for (int i = 0; i < drivers.length; i++) {
+            final InputDriver thisValue = drivers[i];
             final InputDriver otherValue = other.drivers[i];
+            if (!thisValue.equals(otherValue)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Provides a duplicate check based on the optional set of evaluations. As the evaluations are optional, then either
+     * being empty is not duplicate
+     *
+     * @param other {@code DecisionTreeRule} to compare against.
+     * @return true if the evaluations from the other {@code DecisionTreeRule} are both populated and identical.
+     */
+    public boolean isDuplicateEvaluations(final DecisionTreeRule other) {
+        if (other == null || evaluations == null || other.evaluations == null ||
+                evaluations.length != other.evaluations.length) {
+            return false;
+        }
+        for (int i = 0; i < evaluations.length; i++) {
+            final InputDriver thisValue = evaluations[i];
+            final InputDriver otherValue = other.evaluations[i];
             if (!thisValue.equals(otherValue)) {
                 return false;
             }
@@ -176,11 +239,11 @@ public final class DecisionTreeRule implements TreeRule {
      * @return true if the outputs from the other {@code DecisionTreeRule} are identical.
      */
     public boolean isDuplicateOutputData(final DecisionTreeRule other) {
-        if (other == null || this.outputs.size() != other.outputs.size()) {
+        if (other == null || outputs.size() != other.outputs.size()) {
             return false;
         }
 
-        for (final Map.Entry<String, String> entry : this.outputs.entrySet()) {
+        for (final Map.Entry<String, String> entry : outputs.entrySet()) {
             final String value = other.outputs.get(entry.getKey());
             if (!entry.getValue().equals(value)) {
                 return false;
@@ -190,7 +253,7 @@ public final class DecisionTreeRule implements TreeRule {
     }
 
     public boolean isDuplicateDateRange(final DecisionTreeRule other) {
-        return other != null && this.start.equals(other.start) && this.end.equals(other.end);
+        return other != null && start.equals(other.start) && end.equals(other.end);
     }
 
     /**
@@ -208,8 +271,8 @@ public final class DecisionTreeRule implements TreeRule {
         long weightedLevel = INITIAL_WEIGHTED_VALUE;
 
         // The inputDriver list is in descending weighted order, need to iterate in reverse
-        for (int i = this.drivers.length - 1; i >= 0; i--) {
-            if (!InputValueType.WILDCARD.equals(this.drivers[i].getValue())) {
+        for (int i = drivers.length - 1; i >= 0; i--) {
+            if (!InputValueType.WILDCARD.equals(drivers[i].getValue())) {
                 weight += weightedLevel;
             }
             weightedLevel = weightedLevel * 2;
@@ -224,7 +287,7 @@ public final class DecisionTreeRule implements TreeRule {
      */
     @Override
     public UUID getRuleCode() {
-        return this.ruleCode;
+        return ruleCode;
     }
 
     /**
@@ -234,14 +297,14 @@ public final class DecisionTreeRule implements TreeRule {
      * @param cache {@link DriverCache} of {@link InputDriver}
      */
     void replaceDriversFromCache(final DriverCache cache) {
-        for (int i = 0; i < this.drivers.length; i++) {
-            final InputDriver driver = this.drivers[i];
+        for (int i = 0; i < drivers.length; i++) {
+            final InputDriver driver = drivers[i];
             InputDriver cachedDriver = cache.get(driver.getValue(), driver.getType());
             if (cachedDriver == null) {
                 cache.put(driver);
                 cachedDriver = cache.get(driver.getValue(), driver.getType());
             }
-            this.drivers[i] = cachedDriver;
+            drivers[i] = cachedDriver;
         }
     }
 
@@ -250,28 +313,29 @@ public final class DecisionTreeRule implements TreeRule {
         if (this == other) {
             return true;
         }
-        if (other == null || this.getClass() != other.getClass()) {
+        if (other == null || getClass() != other.getClass()) {
             return false;
         }
         final DecisionTreeRule otherRule = (DecisionTreeRule) other;
 
-        return this.ruleIdentifier.equals(otherRule.ruleIdentifier);
+        return ruleIdentifier.equals(otherRule.ruleIdentifier);
     }
 
     @Override
     public int hashCode() {
-        return this.ruleIdentifier.hashCode();
+        return ruleIdentifier.hashCode();
     }
 
     @Override
     public String toString() {
         return "DecisionTreeRule{" +
-                "ruleIdentifier=" + this.ruleIdentifier +
-                ", ruleCode=" + this.ruleCode +
-                ", drivers=" + Arrays.toString(this.drivers) +
-                ", outputs=" + this.outputs +
-                ", start=" + this.start +
-                ", end=" + this.end +
+                "ruleIdentifier=" + ruleIdentifier +
+                ", ruleCode=" + ruleCode +
+                ", drivers=" + Arrays.toString(drivers) +
+                (evaluations != null ? ", evaluations=" + Arrays.toString(evaluations) : "") +
+                ", outputs=" + outputs +
+                ", start=" + start +
+                ", end=" + end +
                 '}';
     }
 }

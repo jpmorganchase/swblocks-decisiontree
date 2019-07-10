@@ -17,9 +17,7 @@
 package org.swblocks.decisiontree.tree;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import org.swblocks.decisiontree.EvaluationResult;
 import org.swblocks.decisiontree.domain.DecisionTreeRule;
@@ -36,6 +34,7 @@ final class ResultNode extends BaseTreeNode implements EvaluationResult, TreeNod
     private final UUID ruleIdentifier;
     private final long weight;
     private final Range<Instant> range;
+    private final InputDriver[] evaluations;
 
     ResultNode(final InputDriver driver,
                final int driverLevel,
@@ -46,6 +45,7 @@ final class ResultNode extends BaseTreeNode implements EvaluationResult, TreeNod
         this.weight = rule.getRuleWeight();
         this.range = delegate.getDateRange();
         this.nextNodes = Collections.emptyMap();
+        this.evaluations = rule.getEvaluations().isPresent() ? rule.getEvaluations().get() : null;
     }
 
     @Override
@@ -71,5 +71,10 @@ final class ResultNode extends BaseTreeNode implements EvaluationResult, TreeNod
     @Override
     public long getWeight() {
         return this.weight;
+    }
+
+    @Override
+    public Optional<InputDriver[]> getEvaluations() {
+        return Optional.ofNullable(evaluations);
     }
 }

@@ -71,6 +71,7 @@ public final class RuleSetBuilder {
     private final List<String> driverNames;
     private final List<Builder<RuleBuilder, DecisionTreeRule>> ruleBuilders = new ArrayList<>(1);
     private final Set<ValueGroup> groups = ConcurrentHashMap.newKeySet();
+    private final List<String> evaluationNames = new ArrayList<>(1);
     private DriverCache cache = new DriverCache();
     private String name;
 
@@ -120,7 +121,8 @@ public final class RuleSetBuilder {
                 CollectionUtils.isNotEmpty(builder.cache.findByInputDriverType(InputValueType.VALUE_GROUP))) {
             rules = correctMissingValueGroups(builder, rules);
         }
-        return new DecisionTreeRuleSet(builder.name, rules, builder.driverNames, builder.cache, builder.groups);
+        return new DecisionTreeRuleSet(builder.name, rules, builder.driverNames, builder.evaluationNames,
+                builder.cache, builder.groups);
     }
 
     /**
@@ -245,6 +247,15 @@ public final class RuleSetBuilder {
      */
     public void setName(final String name) {
         this.name = name;
+    }
+
+    /**
+     * Sets the names for the evaluations which can be applied to a rule.
+     *
+     * @param names list of evaluation names
+     */
+    public void setEvaluationNames(final List<String> names) {
+        this.evaluationNames.addAll(names);
     }
 
     /**

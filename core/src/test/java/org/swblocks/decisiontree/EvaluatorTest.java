@@ -133,6 +133,25 @@ public class EvaluatorTest {
     }
 
     @Test
+    public void testEvaluatorWithRegexMultipleRulesAndWildcards() {
+        final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder =
+                CommisionRuleSetSupplier.getCommissionRuleSetWithRegex();
+
+        final DecisionTreeRuleSet ruleSet = ruleSetBuilder.build();
+        final TreeNode node = constructTree(ruleSet);
+
+        final List<EvaluationResult> results = Evaluator.evaluateAllResultsWithWildcards(
+                Arrays.asList("ELECTRONIC", "CME", "S&P", "US", "INDEX"), null, node);
+
+        assertNotNull(results);
+        assertEquals(4, results.size());
+        assertThat(results.stream().map(EvaluationResult::getRuleIdentifier).collect(Collectors.toList()),
+                IsCollectionContaining.hasItems(new UUID(0, 0),
+                        new UUID(0, 1), new UUID(0, 4),
+                        new UUID(0, 7)));
+    }
+
+    @Test
     public void testEvaluatorWithAlternativePathsAndValueGroups() {
         // Example taken from an issue using data which generated the error.
         final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder =

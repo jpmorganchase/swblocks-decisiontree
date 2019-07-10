@@ -17,7 +17,9 @@
 package org.swblocks.decisiontree;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -87,6 +89,19 @@ public class DecisionTree {
 
     /**
      * Creates the holder and populates the search values for the Decision Tree evaluation.
+     * Includes a Map of evaluation criteria to be applied to the nodes
+     *
+     * @param evaluationsMap map of evaluation names to actual values.
+     * @param searchValues vararg search values in weighted order.
+     * @return {@link Input}
+     */
+    public Input createInputs(final Map<String, String> evaluationsMap, final String... searchValues) {
+        return Input.create(ruleSet.getName(), ruleSet.getWeightedDrivers(), Instant.now(), evaluationsMap,
+                searchValues);
+    }
+
+    /**
+     * Creates the holder and populates the search values for the Decision Tree evaluation.
      *
      * @param evaluationDate date of evaluation for rules.
      * @param searchValues   vararg search values in weighted order.
@@ -147,9 +162,8 @@ public class DecisionTree {
      */
     public List<OutputResults> getEvaluationsFor(final Input input) {
         final List<UUID> result = Evaluator.evaluate(input.getEvaluationInputs(), input.getEvaluationDate(),
-                node);
-
-        return result.stream().map(uuid ->
+                new ArrayList<>(input.getEvaluationMap().values()), node);
+        return result.stream().distinct().map(uuid ->
                 new OutputResults(ruleSet.getRules().get(uuid))).collect(Collectors.toList());
     }
 

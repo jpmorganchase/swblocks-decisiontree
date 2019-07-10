@@ -22,7 +22,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.swblocks.decisiontree.tree.InputDriver;
 import org.swblocks.decisiontree.tree.TreeNode;
 
 /**
@@ -50,7 +52,7 @@ public final class Evaluator {
      */
     public static Optional<UUID> singleEvaluate(final List<String> searchInputs, final Instant time,
                                                 final TreeNode rootNode) {
-        final List<UUID> results = evaluate(searchInputs, time, rootNode);
+        final List<UUID> results = evaluate(searchInputs, time, Collections.emptyList(), rootNode);
 
         if (results.isEmpty()) {
             return Optional.empty();
@@ -73,18 +75,40 @@ public final class Evaluator {
      * @return List of highest weighted matching unique id's or {@code Collections.emptyList} if no match
      */
     public static List<UUID> evaluate(final List<String> searchInputs, final Instant time,
+                                      final List<String> evaluationInputs,
                                       final TreeNode rootNode) {
-        final List<EvaluationResult> results = evaluateAllResults(searchInputs, time, rootNode);
+        final List<EvaluationResult> results = (evaluationInputs.isEmpty() ?
+                evaluateAllResults(searchInputs, time, rootNode) :
+                evaluateAllResultsWithWildcards(searchInputs, time, rootNode));
 
         if (results.isEmpty()) {
             return Collections.emptyList();
-        } else if (results.size() == 1) {
-            return Collections.singletonList(results.get(0).getRuleIdentifier());
         }
 
-        final List<UUID> bestResults = new ArrayList<>(results.size());
-        EvaluationResult bestNode = results.get(0);
-        for (final EvaluationResult result : results) {
+        final List<EvaluationResult> evaluatedResults = new ArrayList<>(results.size());
+        for (final EvaluationResult id : results) {
+            final Optional<InputDriver[]> evaluations = id.getEvaluations();
+            if (evaluations.isPresent() && !evaluationInputs.isEmpty()) {
+                for (int i = 0; i < evaluations.get().length; i++) {
+                    final InputDriver driver = evaluations.get()[i];
+                    final boolean evaluate = driver.evaluate(evaluationInputs.get(i));
+                    if (evaluate) {
+                        evaluatedResults.add(id);
+                    }
+                }
+            } else {
+                evaluatedResults.add(id);
+            }
+        }
+
+        if (evaluatedResults.isEmpty()) {
+            return Collections.emptyList();
+        } else if (evaluatedResults.size() == 1) {
+            return Collections.singletonList(evaluatedResults.get(0).getRuleIdentifier());
+        }
+        final List<UUID> bestResults = new ArrayList<>(evaluatedResults.size());
+        EvaluationResult bestNode = evaluatedResults.get(0);
+        for (final EvaluationResult result : evaluatedResults) {
             if (result.getWeight() > bestNode.getWeight()) {
                 bestResults.clear();
                 bestNode = result;
@@ -122,5 +146,36 @@ public final class Evaluator {
             }
         }
         return results;
+    }
+
+    /**
+     * Evaluates the decision tree using the supplied time and returns multiple matching {@link EvaluationResult} nodes
+     * where each node is a successful evaluation path.  The weight in each result gives the best fit indication.
+     *
+     * <p>Multiple dated nodes are returned where there are two or more possible matches for a node, including the
+     * wildcard.
+     *
+     * @param searchInputs List of String inputs to search the decision tree for.  The size of the list must match the
+     *                     number of drivers in the ruleset the decision tree is based on.
+     * @param time         The point in time at which the evaluation is taking place
+     * @param rootNode     The starting node of the search
+     * @return A list of {@link EvaluationResult} including wildcards that can be used to determine the best fit
+     */
+    public static List<EvaluationResult> evaluateAllResultsWithWildcards(final List<String> searchInputs,
+                                                                         final Instant time,
+                                                                         final TreeNode rootNode) {
+        final List<TreeNode> nextNodes = rootNode.getEvaluatedNodesWithWildcards(searchInputs, time);
+
+        final List<EvaluationResult> results = new ArrayList<>(1);
+        for (final TreeNode nextNode : nextNodes) {
+            if (nextNode instanceof EvaluationResult) {
+                results.add((EvaluationResult) nextNode);
+            } else {
+                results.addAll(evaluateAllResultsWithWildcards(searchInputs, time, nextNode));
+            }
+        }
+        // Need to de-dup the list as list may include duplicate wildcard entries.
+        return new ArrayList<>(results.stream().distinct().collect(
+                Collectors.toMap(EvaluationResult::getRuleIdentifier, eval -> eval)).values());
     }
 }

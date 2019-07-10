@@ -32,10 +32,15 @@ import org.swblocks.decisiontree.domain.ValueGroup;
 import org.swblocks.decisiontree.tree.GroupDriver;
 import org.swblocks.decisiontree.tree.InputDriver;
 import org.swblocks.decisiontree.tree.InputValueType;
+import org.swblocks.decisiontree.tree.StringDriver;
 import org.swblocks.jbl.builders.Builder;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -90,6 +95,40 @@ public class RuleSetBuilderTest {
         assertEquals(Arrays.asList("input1", "input2", "input3"), ruleSet.getDriverNames());
 
         assertEquals("result", rule.getOutputs().get("outputDriver"));
+    }
+
+
+    @Test
+    public void testConstructingRuleSetWithEvaluations() {
+        final Builder<RuleSetBuilder, DecisionTreeRuleSet> ruleSetBuilder =
+                RuleSetBuilder.creator(Arrays.asList("input1", "input2", "input3"));
+        ruleSetBuilder.with(RuleSetBuilder::setName, "testSimpleRuleSet");
+        ruleSetBuilder.with(RuleSetBuilder::setEvaluationNames, Collections.singletonList("Eval1"));
+        ruleSetBuilder.with(RuleSetBuilder::rule, RuleBuilder.creator()
+                .with(RuleBuilder::setId, new UUID(0, 3))
+                .with(RuleBuilder::setCode, new UUID(0, 3))
+                .with(RuleBuilder::input, Arrays.asList("input1", "input2", "input4"))
+                .with(RuleBuilder::evaluations, Collections.singletonList("Eval1"))
+                .with(RuleBuilder::output, Collections.singletonList("outputDriver:result")));
+
+        final DecisionTreeRuleSet ruleSet = ruleSetBuilder.build();
+
+        assertNotNull(ruleSet);
+        assertThat(ruleSet.getRules(), is(notNullValue()));
+        assertThat(ruleSet.getRules().size(), is(1));
+        assertThat(ruleSet.getName(), is("testSimpleRuleSet"));
+        assertThat(ruleSet.getEvaluationNames(), is(notNullValue()));
+        assertThat(ruleSet.getEvaluationNames(), hasSize(1));
+        assertThat(ruleSet.getEvaluationNames(), hasItem("Eval1"));
+
+        final DecisionTreeRule rule = ruleSet.getRules().get(new UUID(0, 3));
+        assertThat(rule, is(notNullValue()));
+        assertThat(rule.getRuleIdentifier(), is(new UUID(0, 3)));
+        assertThat(Arrays.asList(rule.getDrivers()), hasSize(3));
+        assertThat(ruleSet.getDriverNames(), contains("input1", "input2", "input3"));
+        assertThat(rule.getEvaluations().isPresent(), is(true));
+        assertThat(Arrays.asList(rule.getEvaluations().get()), hasItem(new StringDriver("Eval1")));
+        assertThat(rule.getOutputs().get("outputDriver"), is("result"));
     }
 
     @Test

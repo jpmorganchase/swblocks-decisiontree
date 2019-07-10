@@ -38,6 +38,8 @@ import org.swblocks.decisiontree.domain.ValueGroup;
 import org.swblocks.jbl.builders.Builder;
 import org.swblocks.jbl.util.DateRange;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static junit.framework.TestCase.assertNotNull;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
@@ -65,48 +67,48 @@ public class ValueGroupChangeBuilderTest {
         final Instant end = NOW.plus(Period.ofWeeks(5));
         final DateRange range = new DateRange(start, end);
         final List<String> drivers = Arrays.asList("Test1", "Test2", "Test3");
-        this.valueGroups = Collections.singleton(new ValueGroup(id, "TestValueGroup", drivers, range));
-        this.ruleSet = new DecisionTreeRuleSet("TestRuleSet", Collections.emptyMap(), Collections.emptyList(),
-                new DriverCache(), this.valueGroups);
-        this.builder = ValueGroupChangeBuilder.creator("TestValueGroup");
-        this.builder.with(ValueGroupChangeBuilder::ruleSet, this.ruleSet);
+        valueGroups = Collections.singleton(new ValueGroup(id, "TestValueGroup", drivers, range));
+        ruleSet = new DecisionTreeRuleSet("TestRuleSet", emptyMap(), Collections.emptyList(),
+                Collections.emptyList(), new DriverCache(), valueGroups);
+        builder = ValueGroupChangeBuilder.creator("TestValueGroup");
+        builder.with(ValueGroupChangeBuilder::ruleSet, ruleSet);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void nullNameProvided() {
-        this.builder = ValueGroupChangeBuilder.creator(null);
-        this.builder.build();
+        builder = ValueGroupChangeBuilder.creator(null);
+        builder.build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void blankNameProvided() {
-        this.builder = ValueGroupChangeBuilder.creator(" ");
-        this.builder.build();
+        builder = ValueGroupChangeBuilder.creator(" ");
+        builder.build();
     }
 
     @Test(expected = IllegalStateException.class)
     public void noRuleSet() {
-        this.builder = ValueGroupChangeBuilder.creator("TestValueGroup");
-        this.builder.build();
+        builder = ValueGroupChangeBuilder.creator("TestValueGroup");
+        builder.build();
     }
 
     @Test(expected = IllegalStateException.class)
     public void noRequiredArgumentsProvided() {
-        this.builder.build();
+        builder.build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void emptyDrivers() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Collections.emptyList());
-        this.builder.build();
+        builder.with(ValueGroupChangeBuilder::drivers, Collections.emptyList());
+        builder.build();
     }
 
     @Test
     public void createsNewChangeWithNoRuleData() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(1))));
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(1))));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(1));
 
         assertValueGroupChange(changes.get(0), Type.NEW, null, "TestValueGroup",
@@ -115,11 +117,11 @@ public class ValueGroupChangeBuilderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void createsNewChangeFailsWithNoRuleCodes() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(1))));
-        this.builder.with(ValueGroupChangeBuilder::driver, "TestDriver");
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(1))));
+        builder.with(ValueGroupChangeBuilder::driver, "TestDriver");
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(1));
 
         assertValueGroupChange(changes.get(0), Type.NEW, null, "TestValueGroup",
@@ -129,12 +131,12 @@ public class ValueGroupChangeBuilderTest {
     @Test
     public void createsBrandNewValueGroup() {
         // builder that only has value group with name "TestValueGroup"
-        this.builder = ValueGroupChangeBuilder.creator("BrandNewTestValueGroup");
-        this.builder.with(ValueGroupChangeBuilder::ruleSet, this.ruleSet);
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(1))));
+        builder = ValueGroupChangeBuilder.creator("BrandNewTestValueGroup");
+        builder.with(ValueGroupChangeBuilder::ruleSet, ruleSet);
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(1))));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(1));
 
         assertValueGroupChange(changes.get(0), Type.NEW, null, "BrandNewTestValueGroup",
@@ -143,14 +145,14 @@ public class ValueGroupChangeBuilderTest {
 
     @Test
     public void createsNewChange() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(1))));
-        this.builder.with(ValueGroupChangeBuilder::driver, "TestDriver");
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(1))));
+        builder.with(ValueGroupChangeBuilder::driver, "TestDriver");
 
         final UUID id = UUID.randomUUID();
-        this.builder.with(ValueGroupChangeBuilder::ruleCodes, Collections.singletonList(id));
+        builder.with(ValueGroupChangeBuilder::ruleCodes, Collections.singletonList(id));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(1));
 
         final ValueGroupChange change = changes.get(0);
@@ -166,14 +168,14 @@ public class ValueGroupChangeBuilderTest {
         final UUID id = UUID.randomUUID();
         final ValueGroup trueValueGroup = new ValueGroup(id, "TestValueGroup", Arrays.asList("Test1", "Test2", "Test3"),
                 ValueGroup.DEFAULT_DATE_RANGE);
-        final ValueGroup rogueValueGroup = new ValueGroup("AGROUP", Arrays.asList("Test4"));
+        final ValueGroup rogueValueGroup = new ValueGroup("AGROUP", Collections.singletonList("Test4"));
 
-        this.ruleSet = new DecisionTreeRuleSet("TestRuleSet", Collections.emptyMap(), Collections.emptyList(),
-                new DriverCache(), new HashSet<>(Arrays.asList(trueValueGroup, rogueValueGroup)));
+        ruleSet = new DecisionTreeRuleSet("TestRuleSet", emptyMap(), emptyList(),
+                emptyList(), new DriverCache(), new HashSet<>(Arrays.asList(trueValueGroup, rogueValueGroup)));
 
         final Builder<ValueGroupChangeBuilder, List<ValueGroupChange>> valueGroupChangeBuilder =
                 ValueGroupChangeBuilder.creator("TestValueGroup")
-                        .with(ValueGroupChangeBuilder::ruleSet, this.ruleSet)
+                        .with(ValueGroupChangeBuilder::ruleSet, ruleSet)
                         .with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"))
                         .with(ValueGroupChangeBuilder::changeRange, ValueGroup.DEFAULT_DATE_RANGE)
                         .with(ValueGroupChangeBuilder::driver, "TestDriver")
@@ -195,12 +197,12 @@ public class ValueGroupChangeBuilderTest {
 
     @Test
     public void createsNewChangeFinishingBeforeFirstSegmentStarts() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(1))));
-        this.builder.with(ValueGroupChangeBuilder::driver, "TestDriver");
-        this.builder.with(ValueGroupChangeBuilder::ruleCodes, Collections.singletonList(UUID.randomUUID()));
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(1))));
+        builder.with(ValueGroupChangeBuilder::driver, "TestDriver");
+        builder.with(ValueGroupChangeBuilder::ruleCodes, Collections.singletonList(UUID.randomUUID()));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(1));
 
         assertValueGroupChange(changes.get(0), Type.NEW, null, "TestValueGroup",
@@ -209,10 +211,10 @@ public class ValueGroupChangeBuilderTest {
 
     @Test
     public void createsNewChangeStartingBeforeAndFinishingInFirstSegment() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(2))));
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(2))));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(3));
 
         final List<ValueGroupChange> originals = getChangesByType(changes, Type.ORIGINAL);
@@ -233,10 +235,10 @@ public class ValueGroupChangeBuilderTest {
 
     @Test
     public void createsNewChangeStartingBeforeAndFinishingAtFirstSegmentFinish() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(5))));
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(5))));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(2));
 
         final List<ValueGroupChange> originals = getChangesByType(changes, Type.ORIGINAL);
@@ -254,10 +256,10 @@ public class ValueGroupChangeBuilderTest {
 
     @Test
     public void createsNewChangeStartingBeforeFinishingAfterFirstSegmentFinishes() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(9))));
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(NOW, NOW.plus(Period.ofWeeks(9))));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(2));
 
         final List<ValueGroupChange> originals = getChangesByType(changes, Type.ORIGINAL);
@@ -275,11 +277,11 @@ public class ValueGroupChangeBuilderTest {
 
     @Test
     public void createsNewChangeReplacingExistingSegment() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(
                 NOW.plus(Period.ofWeeks(1)), NOW.plus(Period.ofWeeks(5))));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(2));
 
         final List<ValueGroupChange> originals = getChangesByType(changes, Type.ORIGINAL);
@@ -297,12 +299,12 @@ public class ValueGroupChangeBuilderTest {
 
     @Test
     public void createsNewChangeStartingAtExistingSegmentStartAndFinishingAfterSegmentFinish() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
 
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(
                 NOW.plus(Period.ofWeeks(1)), NOW.plus(Period.ofWeeks(9))));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(2));
 
         final List<ValueGroupChange> originals = getChangesByType(changes, Type.ORIGINAL);
@@ -320,11 +322,11 @@ public class ValueGroupChangeBuilderTest {
 
     @Test
     public void createsNewChangeStartingAtExistingSegmentStartAndFinishingFinishingBeforeSegmentFinish() {
-        this.builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
-        this.builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(
+        builder.with(ValueGroupChangeBuilder::drivers, Arrays.asList("Test1", "Test2", "Test4"));
+        builder.with(ValueGroupChangeBuilder::changeRange, new DateRange(
                 NOW.plus(Period.ofWeeks(1)), NOW.plus(Period.ofWeeks(4))));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(3));
 
         final List<ValueGroupChange> originals = getChangesByType(changes, Type.ORIGINAL);
@@ -345,35 +347,35 @@ public class ValueGroupChangeBuilderTest {
 
     @Test(expected = IllegalStateException.class)
     public void cannotCreatesValueGroupChangesForExistingGroupsWithNoDriverName() {
-        this.builder.with(ValueGroupChangeBuilder::changeType, Type.NONE);
-        this.builder.with(ValueGroupChangeBuilder::ruleCodes, Arrays.asList(UUID.randomUUID()));
+        builder.with(ValueGroupChangeBuilder::changeType, Type.NONE);
+        builder.with(ValueGroupChangeBuilder::ruleCodes, Arrays.asList(UUID.randomUUID()));
 
-        this.builder.build();
+        builder.build();
     }
 
     @Test(expected = IllegalStateException.class)
     public void cannotCreatesValueGroupChangesForExistingGroupsWithNoRuleCodes() {
-        this.builder.with(ValueGroupChangeBuilder::changeType, Type.NONE);
-        this.builder.with(ValueGroupChangeBuilder::driver, "TestDriver");
+        builder.with(ValueGroupChangeBuilder::changeType, Type.NONE);
+        builder.with(ValueGroupChangeBuilder::driver, "TestDriver");
 
-        this.builder.build();
+        builder.build();
     }
 
     @Test
     public void createsValueGroupChangesForExistingValueGroups() {
         final UUID code = UUID.randomUUID();
-        this.builder.with(ValueGroupChangeBuilder::changeType, Type.NONE);
-        this.builder.with(ValueGroupChangeBuilder::driver, "TestDriver");
-        this.builder.with(ValueGroupChangeBuilder::ruleCodes, Arrays.asList(code));
+        builder.with(ValueGroupChangeBuilder::changeType, Type.NONE);
+        builder.with(ValueGroupChangeBuilder::driver, "TestDriver");
+        builder.with(ValueGroupChangeBuilder::ruleCodes, Arrays.asList(code));
 
-        final List<ValueGroupChange> changes = this.builder.build();
+        final List<ValueGroupChange> changes = builder.build();
         assertThat(changes, hasSize(1));
 
         final ValueGroupChange groupChange = changes.get(0);
         assertEquals(Type.NONE, groupChange.getType());
 
         final ValueGroup created = groupChange.getValueGroup();
-        final ValueGroup original = this.valueGroups.stream().findFirst().get();
+        final ValueGroup original = valueGroups.stream().findFirst().get();
 
         assertEquals(original.getId(), created.getId());
         assertEquals(original.getName(), created.getName());

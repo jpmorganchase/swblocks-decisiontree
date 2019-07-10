@@ -16,6 +16,9 @@
 
 package org.swblocks.decisiontree;
 
+import org.swblocks.decisiontree.tree.InputDriver;
+
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -36,4 +39,10 @@ public interface EvaluationResult {
      * @return weight
      */
     long getWeight();
+
+    /**
+     * Gets any Optional evaluations which are evaluated if the result matches before comparing weight.
+     * @return evaluations
+     */
+    Optional<InputDriver[]> getEvaluations();
 }
